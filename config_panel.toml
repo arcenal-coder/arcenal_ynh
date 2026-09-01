@@ -1,0 +1,44 @@
+#:schema https://raw.githubusercontent.com/YunoHost/apps/master/schemas/config_panel.v1.schema.json
+
+version = "1.0"
+
+[main]
+name.en = "ARCenal Agent"
+name.fr = "ARCenal Agent"
+
+    [main.model]
+    name.en = "Model provider"
+    name.fr = "Fournisseur de modèles"
+
+        [main.model.provider]
+        ask.en = "Provider"
+        ask.fr = "Fournisseur"
+        type = "select"
+        choices = ["nous-portal", "openrouter", "openai", "anthropic", "custom"]
+        default = "openrouter"
+
+        [main.model.model]
+        ask.en = "Default model"
+        ask.fr = "Modèle par défaut"
+        type = "string"
+        default = "openrouter/auto"
+
+    [main.secrets]
+    name.en = "API keys"
+    name.fr = "Clés API"
+
+        [main.secrets.api_key]
+        ask.en = "Provider API key"
+        ask.fr = "Clé API du fournisseur"
+        type = "password"
+        optional = true
+
+    [main.gateway]
+    name.en = "Messaging gateways (optional)"
+    name.fr = "Passerelles de messagerie (optionnel)"
+
+        [main.gateway.enabled]
+        ask.en = "Enable the messaging gateway service (Telegram, Discord, ...)"
+        ask.fr = "Activer le service de passerelles (Telegram, Discord, ...)"
+        type = "boolean"
+        default = false

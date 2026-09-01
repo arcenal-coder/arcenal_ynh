@@ -1,0 +1,35 @@
+[Unit]
+Description=ARCenal Agent — self-hosted AI agent web UI
+After=network.target
+
+[Service]
+Type=simple
+User=__APP__
+Group=__APP__
+WorkingDirectory=__INSTALL_DIR__
+Environment=HOME=__DATA_DIR_PARENT__
+# Point the agent's home (~/.hermes equivalent) at the persistent data dir
+Environment=HERMES_HOME=__DATA_DIR__
+# Never run interactive wizards from the service
+Environment=HERMES_NONINTERACTIVE=1
+# Skip the SPA build at startup (built during install/upgrade)
+Environment=HERMES_WEB_DIST=__INSTALL_DIR__/web/dist
+# Updates are owned by YunoHost's upgrade script
+Environment=HERMES_DISABLE_UPDATE=1
+ExecStart=__INSTALL_DIR__/.venv/bin/arcenal serve --host 127.0.0.1 --port __PORT__ --skip-build --no-open
+Restart=on-failure
+RestartSec=5
+
+# Hardening — the agent runs shell commands as this user, keep it boxed in.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=__DATA_DIR__ __INSTALL_DIR__
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

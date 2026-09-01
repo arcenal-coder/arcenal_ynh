@@ -1,0 +1,81 @@
+#:schema https://raw.githubusercontent.com/YunoHost/apps/master/schemas/manifest.v2.schema.json
+
+packaging_format = 2
+
+id = "arcenal"
+name = "ARCenal Agent"
+description."en" = "Self-hosted AI agent (fork of Hermes Agent by Nous Research), served as a web app on your YunoHost server"
+description."fr" = "Agent IA auto-hébergé (fork de Hermes Agent de Nous Research), servi comme application web sur votre serveur YunoHost"
+
+version = "0.21.0~ynh1"
+
+maintainers = ["compteonyx"]
+
+[upstream]
+license = "MIT"
+website = "https://github.com/NousResearch/hermes-agent"
+code = "https://github.com/NousResearch/hermes-agent"
+cpe = "???" # not applicable — not a packaged CPE software
+
+[integration]
+yunohost = ">= 12.0" # Debian bookworm base; uv manages the Python 3.11 runtime itself
+architectures = ["amd64", "arm64"]
+multi_instance = false
+ldap = "not_relevant"
+sso = "not_relevant"
+disk = "2G"
+ram.build = "1500M"
+ram.runtime = "1G"
+
+[install]
+    [install.domain]
+    type = "domain"
+
+    [install.path]
+    type = "path"
+    default = "/arcenal"
+
+    [install.admin]
+    type = "user"
+
+    [install.init_main_permission]
+    type = "group"
+    default = "admins"
+
+    [install.provider]
+    ask.en = "Choose the default model provider"
+    ask.fr = "Choisissez le fournisseur de modèles par défaut"
+    type = "select"
+    choices = ["nous-portal", "openrouter", "openai", "anthropic", "custom"]
+    default = "openrouter"
+
+    [install.api_key]
+    ask.en = "API key for the chosen provider (can be left empty and set later in the config panel)"
+    ask.fr = "Clé API pour le fournisseur choisi (peut être laissée vide et définie plus tard dans le panneau de configuration)"
+    type = "string"
+    optional = true
+    default = ""
+
+    [install.model]
+    ask.en = "Default model (e.g. openrouter/auto)"
+    ask.fr = "Modèle par défaut (ex. openrouter/auto)"
+    type = "string"
+    default = "openrouter/auto"
+
+[resources]
+    [resources.systemuser]
+    format = "directory"
+    allow_ssh = false
+    allow_sftp = false
+    home = "/var/www/arcenal"
+
+    [resources.ports]
+    main.default = 9119
+
+    [resources.apt]
+    packages = ["python3", "python3-venv", "ripgrep", "ffmpeg", "git", "curl", "ca-certificates", "nodejs", "npm"]
+
+    [resources.sources]
+        [resources.sources.main]
+        url = "https://github.com/Onyx-ING/arcenal-agent/archive/refs/tags/v0.21.0-arcenal1.tar.gz"
+        sha256 = "fe51b385e87afae020dcc3d85f9a63b0503afd3815defdacab3d287e833703be"

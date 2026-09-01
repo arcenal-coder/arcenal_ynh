@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# ARCenal Agent install script (YunoHost packaging v2)
+# Actions: unpack source, install deps, write non-interactive config,
+# expose the web UI through nginx, enable the systemd service.
+
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+source /usr/share/yunohost/helpers
+
+#=================================================
+# DOWNLOAD SOURCES
+#=================================================
+ynh_setup_source --dest_dir="$install_dir"
+
+#=================================================
+# SYSTEM USER & PERMISSIONS
+#=================================================
+# The agent executes arbitrary shell commands on the server: it must run
+# as an unprivileged user with its own home, never as root or www-data.
+chown -R "$app:" "$install_dir"
+find "$install_dir" -type d -exec chmod 750 {} \;
+find "$install_dir" -type f -exec chmod 640 {} \;
+
+#=================================================
+# INSTALL DEPENDENCIES (uv + Python venv)
+#=================================================
+ynh_exec_as_app curl -LsSf https://astral.sh/uv/install.sh \
+    | YNH_APP_HOME="$install_dir" UV_INSTALL_DIR="$install_dir/.local/bin" sh
+ynh_exec_as_app env \
+    HOME="$install_dir" \
+    UV_PYTHON_INSTALL_DIR="$install_dir/.uv/python" \
+    "$install_dir/.local/bin/uv" sync --python 3.11 --no-dev
+
+# Pre-build the web UI so the service doesn't need to build at first start.
+ynh_exec_as_app env HOME="$install_dir" npm ci --prefix "$install_dir/web"
+ynh_exec_as_app env HOME="$install_dir" npm run build --prefix "$install_dir/web"
+
+#=================================================
+# NON-INTERACTIVE CONFIG (replaces `hermes setup`)
+#=================================================
+data_dir="/var/www/$app/data"
+mkdir -p "$data_dir"
+chmod 700 "$data_dir"
+
+cat > "$data_dir/config.yaml" <<EOF
+# Managed by YunoHost (arcenal app).
+provider: $provider
+model: $model
+terminal:
+  backend: local
+EOF
+
+if [ -n "$api_key" ]; then
+    provider_env="$(echo "$provider" | tr '[:lower:]-' '[:upper:]_')"
+    printf '%s_API_KEY=%s\n' "$provider_env" "$api_key" > "$data_dir/.env"
+    chmod 600 "$data_dir/.env"
+fi
+chown -R "$app:" "$data_dir"
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+ynh_config_add_nginx
+
+#=================================================
+# SYSTEMD CONFIGURATION
+#=================================================
+ynh_config_add_systemd
+
+yunohost service add "$app" --description="ARCenal Agent — self-hosted AI agent web UI" --log="/var/log/$app/$app.log"
+
+#=================================================
+# START SERVICE
+#=================================================
+ynh_systemctl --service="$app" --action="enable --now"

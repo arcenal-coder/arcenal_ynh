@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# ARCenal Agent config script (YunoHost packaging v2)
+# Applies config panel changes to the agent's config.yaml / .env,
+# replacing any need to run the interactive `hermes setup` wizard.
+
+source /usr/share/yunohost/helpers
+
+data_dir="/var/www/$app/data"
+
+changed_provider=$([ -n "${provider:-}" ] && echo 1 || echo 0)
+changed_model=$([ -n "${model:-}" ] && echo 1 || echo 0)
+changed_api_key=$([ -n "${api_key:-}" ] && echo 1 || echo 0)
+
+if [ "$changed_provider" = "1" ] || [ "$changed_model" = "1" ]; then
+    current_provider=$(grep -E '^provider:' "$data_dir/config.yaml" | awk '{print $2}')
+    current_model=$(grep -E '^model:' "$data_dir/config.yaml" | awk '{print $2}')
+    new_provider="${provider:-$current_provider}"
+    new_model="${model:-$current_model}"
+
+    sed -i "s/^provider:.*/provider: $new_provider/" "$data_dir/config.yaml"
+    sed -i "s/^model:.*/model: $new_model/" "$data_dir/config.yaml"
+fi
+
+if [ "$changed_api_key" = "1" ]; then
+    provider_env="$(grep -E '^provider:' "$data_dir/config.yaml" | awk '{print $2}' | tr '[:lower:]-' '[:upper:]_')"
+    printf '%s_API_KEY=%s\n' "$provider_env" "$api_key" > "$data_dir/.env"
+    chmod 600 "$data_dir/.env"
+fi
+
+if [ "${enabled:-}" = "true" ]; then
+    ynh_systemctl --service="$app-gateway" --action="enable --now" || \
+        ynh_print_warn "Gateway service not yet packaged — configure gateways manually."
+fi
+
+# Restart the main service to pick up config changes
+ynh_systemctl --service="$app" --action="restart"

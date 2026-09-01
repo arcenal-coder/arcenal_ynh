@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# ARCenal Agent upgrade script (YunoHost packaging v2)
+# Replaces the upstream `hermes update` mechanism entirely:
+# versions are managed by YunoHost, never by git pull inside the app dir.
+
+source /usr/share/yunohost/helpers
+
+#=================================================
+# STOP SERVICE
+#=================================================
+ynh_systemctl --service="$app" --action="stop"
+
+#=================================================
+# DOWNLOAD NEW SOURCES
+#=================================================
+ynh_setup_source --dest_dir="$install_dir"
+chown -R "$app:" "$install_dir"
+
+#=================================================
+# UPGRADE DEPENDENCIES
+#=================================================
+ynh_exec_as_app env \
+    HOME="$install_dir" \
+    UV_PYTHON_INSTALL_DIR="$install_dir/.uv/python" \
+    "$install_dir/.local/bin/uv" sync --python 3.11 --no-dev || \
+    ynh_die "Failed to sync Python dependencies — check $install_dir/.local/bin/uv"
+
+ynh_exec_as_app env HOME="$install_dir" npm ci --prefix "$install_dir/web"
+ynh_exec_as_app env HOME="$install_dir" npm run build --prefix "$install_dir/web"
+
+# NOTE: the data dir (/var/www/$app/data — config.yaml, .env, skills, memory)
+# is intentionally left untouched by upgrades.
+
+#=================================================
+# REAPPLY CONFIGS & RESTART
+#=================================================
+ynh_config_add_nginx
+ynh_config_add_systemd
+ynh_systemctl --service="$app" --action="restart"
