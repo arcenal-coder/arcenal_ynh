@@ -77,5 +77,5 @@ ram.runtime = "1G"
 
     [resources.sources]
         [resources.sources.main]
-        url = "https://github.com/Onyx-ING/arcenal-agent/archive/refs/tags/v0.21.0-arcenal1.tar.gz"
+        url = "https://github.com/arcenal-coder/arcenal-agent/archive/refs/tags/v0.21.0-arcenal1.tar.gz"
         sha256 = "fe51b385e87afae020dcc3d85f9a63b0503afd3815defdacab3d287e833703be"
