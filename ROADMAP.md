@@ -10,7 +10,9 @@ cochée qu'après validation sur une YunoHost propre.
 - **2026-09-04 — YunoHost 12.1.41.2, Debian 12 ARM64, VM Lima :** première
   installation arrêtée lors de `uv sync`, car son répertoire courant était le
   dossier temporaire privé de YunoHost. Correction publiée dans
-  `0.21.0~ynh3` avec `uv sync --directory "$install_dir"`. Nouveau test requis.
+  `0.21.0~ynh3` avec `uv sync --directory "$install_dir"`. Le nettoyage a
+  ensuite identifié l'ancien helper `ynh_safe_remove`, retiré dans
+  `0.21.0~ynh4` au profit de la déprovision automatique des ressources v2.
 
 ## 1. État des lieux
 

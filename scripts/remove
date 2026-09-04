@@ -1,15 +1,12 @@
 #!/bin/bash
 
-# ARCenal Agent remove script (YunoHost packaging v2)
+# Suppression d'ARCenal Agent — packaging YunoHost v2.
 
 source /usr/share/yunohost/helpers
 
-# Stop and remove the service
-ynh_systemctl --service="$app" --action="stop" || true
-yunohost service remove "$app" || true
-
-# Remove app dir and config; purge data only if purge was requested
-ynh_safe_remove "$install_dir"
-if [ "${YNH_APP_PURGE:-0}" = "1" ]; then
-    ynh_safe_remove "/var/www/$app"
+# Arrête et désenregistre le service lorsqu'il a été créé. Les ressources v2
+# se chargent ensuite de supprimer le code et, avec --purge, les données.
+if systemctl list-unit-files "$app.service" --no-legend 2>/dev/null | grep -q "$app.service"; then
+    ynh_systemctl --service="$app" --action="stop"
 fi
+yunohost service remove "$app" || true
