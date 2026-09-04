@@ -7,7 +7,7 @@ name = "ARCenal Agent"
 description."en" = "Self-hosted AI agent (fork of Hermes Agent by Nous Research), served as a web app on your YunoHost server"
 description."fr" = "Agent IA auto-hébergé (fork de Hermes Agent de Nous Research), servi comme application web sur votre serveur YunoHost"
 
-version = "0.21.0~ynh9"
+version = "0.21.0~ynh10"
 
 maintainers = ["compteonyx"]
 

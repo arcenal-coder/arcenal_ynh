@@ -25,7 +25,9 @@ cochée qu'après validation sur une YunoHost propre.
   révélé un import TypeScript devenu inutilisé pendant le rebranding ; il est
   retiré dans `v0.21.0-arcenal4`, livré par `0.21.0~ynh8`. Avant le quatrième
   essai, `0.21.0~ynh9` corrige aussi le dossier `HOME` du service et utilise
-  l'action `start` attendue par le helper systemd YunoHost.
+  l'action `start` attendue par le helper systemd YunoHost. Le quatrième essai
+  valide le build web et conduit `0.21.0~ynh10` à fournir au helper le nom exact
+  du modèle `arcenal.service`.
 
 ## 1. État des lieux
 

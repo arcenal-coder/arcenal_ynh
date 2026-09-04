@@ -39,5 +39,5 @@ ynh_exec_as_app env HOME="$install_dir" \
 # REAPPLY CONFIGS & RESTART
 #=================================================
 ynh_config_add_nginx
-ynh_config_add_systemd --template="arcenal"
+ynh_config_add_systemd --template="arcenal.service"
 ynh_systemctl --service="$app" --action="restart"
