@@ -6,6 +6,11 @@ source /usr/share/yunohost/helpers
 
 ynh_restore_file --origin_path="/var/www/$app/data"
 
+# Les sauvegardes antérieures au garde YunoHost ne contiennent pas ce marqueur.
+printf '%s\n' 'managed-by-yunohost' > "/var/www/$app/data/.arcenal-yunohost"
+chmod 600 "/var/www/$app/data/.arcenal-yunohost"
+chown "$app:" "/var/www/$app/data/.arcenal-yunohost"
+
 # Reinstall sources and dependencies, then reapply configs
 ynh_setup_source --dest_dir="$install_dir"
 chown -R "$app:" "$install_dir"
@@ -15,5 +20,5 @@ ynh_exec_as_app env \
     "$install_dir/.local/bin/uv" sync --python 3.11 --no-dev
 
 ynh_config_add_nginx
-ynh_config_add_systemd
+ynh_config_add_systemd --template="arcenal"
 ynh_systemctl --service="$app" --action="enable --now"

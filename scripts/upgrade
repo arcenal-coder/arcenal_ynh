@@ -36,5 +36,5 @@ ynh_exec_as_app env HOME="$install_dir" npm run build --prefix "$install_dir/web
 # REAPPLY CONFIGS & RESTART
 #=================================================
 ynh_config_add_nginx
-ynh_config_add_systemd
+ynh_config_add_systemd --template="arcenal"
 ynh_systemctl --service="$app" --action="restart"

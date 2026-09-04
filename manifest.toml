@@ -7,7 +7,7 @@ name = "ARCenal Agent"
 description."en" = "Self-hosted AI agent (fork of Hermes Agent by Nous Research), served as a web app on your YunoHost server"
 description."fr" = "Agent IA auto-hébergé (fork de Hermes Agent de Nous Research), servi comme application web sur votre serveur YunoHost"
 
-version = "0.21.0~ynh1"
+version = "0.21.0~ynh2"
 
 maintainers = ["compteonyx"]
 
@@ -18,7 +18,8 @@ code = "https://github.com/NousResearch/hermes-agent"
 cpe = "???" # not applicable — not a packaged CPE software
 
 [integration]
-yunohost = ">= 12.0" # Debian bookworm base; uv manages the Python 3.11 runtime itself
+yunohost = ">= 12.1.17" # Required by the current helpers 2.1 contract
+helpers_version = "2.1"
 architectures = ["amd64", "arm64"]
 multi_instance = false
 ldap = "not_relevant"
@@ -63,11 +64,23 @@ ram.runtime = "1G"
     default = "openrouter/auto"
 
 [resources]
-    [resources.systemuser]
-    format = "directory"
+    [resources.system_user]
     allow_ssh = false
     allow_sftp = false
     home = "/var/www/arcenal"
+
+    [resources.install_dir]
+    dir = "/var/www/arcenal/app"
+
+    [resources.data_dir]
+    dir = "/var/www/arcenal/data"
+    owner = "arcenal:rwx"
+    group = "arcenal:rx"
+
+    [resources.permissions]
+    main.url = "/"
+    main.auth_header = true
+    main.protected = true
 
     [resources.ports]
     main.default = 9119
@@ -77,5 +90,5 @@ ram.runtime = "1G"
 
     [resources.sources]
         [resources.sources.main]
-        url = "https://github.com/arcenal-coder/arcenal-agent/archive/refs/tags/v0.21.0-arcenal1.tar.gz"
-        sha256 = "fe51b385e87afae020dcc3d85f9a63b0503afd3815defdacab3d287e833703be"
+        url = "https://github.com/arcenal-coder/arcenal-agent/archive/refs/tags/v0.21.0-arcenal2.tar.gz"
+        sha256 = "bf5a9fd1095a83bfb7273de34190e74edc0510cf6077fd755d30f01e96d2ff3b"

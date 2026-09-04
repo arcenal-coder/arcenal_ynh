@@ -10,10 +10,12 @@ WorkingDirectory=__INSTALL_DIR__
 Environment=HOME=__DATA_DIR_PARENT__
 # Point the agent's home (~/.hermes equivalent) at the persistent data dir
 Environment=HERMES_HOME=__DATA_DIR__
+# ARCenal vérifie ce marqueur du paquet avant d'exécuter le code Hermes.
+Environment=ARCENAL_YUNOHOST_MARKER=__DATA_DIR__/.arcenal-yunohost
 # Never run interactive wizards from the service
 Environment=HERMES_NONINTERACTIVE=1
 # Skip the SPA build at startup (built during install/upgrade)
-Environment=HERMES_WEB_DIST=__INSTALL_DIR__/web/dist
+Environment=HERMES_WEB_DIST=__INSTALL_DIR__/hermes_cli/web_dist
 # Updates are owned by YunoHost's upgrade script
 Environment=HERMES_DISABLE_UPDATE=1
 ExecStart=__INSTALL_DIR__/.venv/bin/arcenal serve --host 127.0.0.1 --port __PORT__ --skip-build --no-open

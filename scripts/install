@@ -44,6 +44,10 @@ data_dir="/var/www/$app/data"
 mkdir -p "$data_dir"
 chmod 700 "$data_dir"
 
+# Preuve que l'exécution ARCenal a été installée par le paquet YunoHost officiel.
+printf '%s\n' 'managed-by-yunohost' > "$data_dir/.arcenal-yunohost"
+chmod 600 "$data_dir/.arcenal-yunohost"
+
 cat > "$data_dir/config.yaml" <<EOF
 # Managed by YunoHost (arcenal app).
 provider: $provider
@@ -67,7 +71,7 @@ ynh_config_add_nginx
 #=================================================
 # SYSTEMD CONFIGURATION
 #=================================================
-ynh_config_add_systemd
+ynh_config_add_systemd --template="arcenal"
 
 yunohost service add "$app" --description="ARCenal Agent — self-hosted AI agent web UI" --log="/var/log/$app/$app.log"
 
