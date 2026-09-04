@@ -30,7 +30,9 @@ cochée qu'après validation sur une YunoHost propre.
   du modèle `arcenal.service`. L'installation complète révèle enfin que la
   commande `serve` est volontairement limitée au backend : `0.21.0~ynh11`
   lance `dashboard`, transmet le préfixe YunoHost et construit les ressources
-  web pour le chemin choisi lors de l'installation.
+  web pour le chemin choisi lors de l'installation. Le premier test de mise à
+  niveau corrige dans `0.21.0~ynh12` l'appel au helper de sauvegarde v2, dont le
+  chemin est un argument positionnel.
 
 ## 1. État des lieux
 

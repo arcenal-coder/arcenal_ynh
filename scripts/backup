@@ -1,9 +1,8 @@
 #!/bin/bash
 
-# ARCenal Agent backup script (YunoHost packaging v2)
+# Sauvegarde d'ARCenal Agent avec le packaging YunoHost v2.
 
 source /usr/share/yunohost/helpers
 
-# Back up the data dir (config, .env, skills, memory) — the app dir itself
-# is re-downloadable from source and not worth backing up.
-ynh_backup --src_path="/var/www/$app/data" --not_mkdir
+# Les sources sont retéléchargeables ; seules les données persistantes comptent.
+ynh_backup "/var/www/$app/data"
