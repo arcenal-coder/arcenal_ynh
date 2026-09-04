@@ -15,7 +15,10 @@ cochée qu'après validation sur une YunoHost propre.
   `0.21.0~ynh4` au profit de la déprovision automatique des ressources v2. Le
   pipe d'installation de `uv` exécutait son côté droit sous root ; `0.21.0~ynh5`
   place désormais l'ensemble du pipeline sous l'utilisateur applicatif et
-  épingle `uv` 0.12.9.
+  épingle `uv` 0.12.9. Le second essai a détecté une version Python non conforme
+  à PEP 440 ; le tag `v0.21.0-arcenal3` utilise désormais
+  `0.21.0+arcenal.3`, validé dans la VM avec `uv lock --check`, et est livré par
+  le paquet `0.21.0~ynh6`.
 
 ## 1. État des lieux
 

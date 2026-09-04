@@ -10,7 +10,7 @@ readonly ARCENAL_SERVICE_NAME="arcenal"
 # Compute a download URL + sha256 for the ARCenal Agent source archive.
 # Pin the commit hash in the manifest instead of a branch for reproducibility.
 arcenal_get_source_version() {
-    echo "0.21.0-arcenal2"
+    echo "0.21.0-arcenal3"
 }
 
 arcenal_install_source() {
