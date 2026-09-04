@@ -22,8 +22,9 @@ ynh_exec_as_app env \
 
 ynh_exec_as_app env HOME="$install_dir" \
     npm --prefix "$install_dir" ci --workspace web
+web_base="${path%/}/"
 ynh_exec_as_app env HOME="$install_dir" \
-    npm --prefix "$install_dir" run build --workspace web
+    npm --prefix "$install_dir" run build --workspace web -- --base="$web_base"
 
 ynh_config_add_nginx
 ynh_config_add_systemd --template="arcenal.service"

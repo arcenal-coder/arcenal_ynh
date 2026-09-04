@@ -34,10 +34,11 @@ ynh_exec_as_app env \
         --directory "$install_dir" --python 3.11 --no-dev
 
 # Construit l'interface depuis la racine du monorepo, où se trouve le lockfile.
+web_base="${path%/}/"
 ynh_exec_as_app env HOME="$install_dir" \
     npm --prefix "$install_dir" ci --workspace web
 ynh_exec_as_app env HOME="$install_dir" \
-    npm --prefix "$install_dir" run build --workspace web
+    npm --prefix "$install_dir" run build --workspace web -- --base="$web_base"
 
 #=================================================
 # CONFIGURATION NON INTERACTIVE

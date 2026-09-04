@@ -27,7 +27,10 @@ cochée qu'après validation sur une YunoHost propre.
   essai, `0.21.0~ynh9` corrige aussi le dossier `HOME` du service et utilise
   l'action `start` attendue par le helper systemd YunoHost. Le quatrième essai
   valide le build web et conduit `0.21.0~ynh10` à fournir au helper le nom exact
-  du modèle `arcenal.service`.
+  du modèle `arcenal.service`. L'installation complète révèle enfin que la
+  commande `serve` est volontairement limitée au backend : `0.21.0~ynh11`
+  lance `dashboard`, transmet le préfixe YunoHost et construit les ressources
+  web pour le chemin choisi lors de l'installation.
 
 ## 1. État des lieux
 
