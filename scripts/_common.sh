@@ -29,7 +29,8 @@ arcenal_install_deps() {
     ynh_exec_as_app env \
         HOME="$ARCENAL_INSTALL_DIR" \
         UV_PYTHON_INSTALL_DIR="$ARCENAL_INSTALL_DIR/.uv/python" \
-        "$ARCENAL_INSTALL_DIR/.local/bin/uv" sync --python 3.11 --no-dev
+        "$ARCENAL_INSTALL_DIR/.local/bin/uv" sync \
+            --directory "$ARCENAL_INSTALL_DIR" --python 3.11 --no-dev
 }
 
 arcenal_write_config() {

@@ -5,6 +5,13 @@ Damien et les autres contributeurs. Il décrit l'état observé dans les dépôt
 les décisions déjà prises et l'ordre de réalisation. Une case ne doit être
 cochée qu'après validation sur une YunoHost propre.
 
+### Journal de validation
+
+- **2026-09-04 — YunoHost 12.1.41.2, Debian 12 ARM64, VM Lima :** première
+  installation arrêtée lors de `uv sync`, car son répertoire courant était le
+  dossier temporaire privé de YunoHost. Correction publiée dans
+  `0.21.0~ynh3` avec `uv sync --directory "$install_dir"`. Nouveau test requis.
+
 ## 1. État des lieux
 
 ### Dépôts

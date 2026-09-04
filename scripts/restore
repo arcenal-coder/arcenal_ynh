@@ -17,7 +17,8 @@ chown -R "$app:" "$install_dir"
 ynh_exec_as_app env \
     HOME="$install_dir" \
     UV_PYTHON_INSTALL_DIR="$install_dir/.uv/python" \
-    "$install_dir/.local/bin/uv" sync --python 3.11 --no-dev
+    "$install_dir/.local/bin/uv" sync \
+        --directory "$install_dir" --python 3.11 --no-dev
 
 ynh_config_add_nginx
 ynh_config_add_systemd --template="arcenal"
