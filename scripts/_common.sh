@@ -7,15 +7,14 @@ readonly ARCENAL_INSTALL_DIR="/var/www/arcenal/app"
 readonly ARCENAL_DATA_DIR="/var/www/arcenal/data"     # HERMES_HOME (config.yaml, .env, skills, memory)
 readonly ARCENAL_SERVICE_NAME="arcenal"
 
-# Compute a download URL + sha256 for the ARCenal Agent source archive.
-# Pin the commit hash in the manifest instead of a branch for reproducibility.
+# Retourne la version figée de l'archive source ARCenal Agent.
+# Le manifeste épingle aussi son empreinte afin de garantir la reproductibilité.
 arcenal_get_source_version() {
-    echo "0.21.0-arcenal3"
+    echo "0.21.0-arcenal4"
 }
 
 arcenal_install_source() {
-    # The source is expected to be declared in manifest.toml [resources.sources].
-    # ynh_setup_source unpacks it into $ARCENAL_INSTALL_DIR
+    # La source est déclarée dans manifest.toml, puis extraite dans ce dossier.
     ynh_setup_source --dest_dir="$ARCENAL_INSTALL_DIR"
 }
 

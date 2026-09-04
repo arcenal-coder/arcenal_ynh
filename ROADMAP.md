@@ -21,7 +21,9 @@ cochée qu'après validation sur une YunoHost propre.
   le paquet `0.21.0~ynh6`. Le troisième essai a validé l'environnement Python
   complet, puis détecté que le lockfile npm est à la racine du monorepo. Le
   paquet `0.21.0~ynh7` utilise la ressource Node.js 22.22 de YunoHost et exécute
-  `npm ci` / `npm run build` sur le workspace `web` depuis la racine.
+  `npm ci` / `npm run build` sur le workspace `web` depuis la racine. Ce build a
+  révélé un import TypeScript devenu inutilisé pendant le rebranding ; il est
+  retiré dans `v0.21.0-arcenal4`, livré par `0.21.0~ynh8`.
 
 ## 1. État des lieux
 
