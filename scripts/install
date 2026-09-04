@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# ARCenal Agent install script (YunoHost packaging v2)
-# Actions: unpack source, install deps, write non-interactive config,
-# expose the web UI through nginx, enable the systemd service.
+# Installation d'ARCenal Agent avec le packaging YunoHost v2.
 
 #=================================================
 # IMPORT GENERIC HELPERS
@@ -17,8 +15,7 @@ ynh_setup_source --dest_dir="$install_dir"
 #=================================================
 # SYSTEM USER & PERMISSIONS
 #=================================================
-# The agent executes arbitrary shell commands on the server: it must run
-# as an unprivileged user with its own home, never as root or www-data.
+# L'agent exécute des commandes : il reste donc confiné à son utilisateur dédié.
 chown -R "$app:" "$install_dir"
 find "$install_dir" -type d -exec chmod 750 {} \;
 find "$install_dir" -type f -exec chmod 640 {} \;
@@ -43,7 +40,7 @@ ynh_exec_as_app env HOME="$install_dir" \
     npm --prefix "$install_dir" run build --workspace web
 
 #=================================================
-# NON-INTERACTIVE CONFIG (replaces `hermes setup`)
+# CONFIGURATION NON INTERACTIVE
 #=================================================
 data_dir="/var/www/$app/data"
 mkdir -p "$data_dir"
@@ -54,7 +51,7 @@ printf '%s\n' 'managed-by-yunohost' > "$data_dir/.arcenal-yunohost"
 chmod 600 "$data_dir/.arcenal-yunohost"
 
 cat > "$data_dir/config.yaml" <<EOF
-# Managed by YunoHost (arcenal app).
+# Géré par YunoHost (application arcenal).
 provider: $provider
 model: $model
 terminal:
@@ -83,4 +80,4 @@ yunohost service add "$app" --description="ARCenal Agent — self-hosted AI agen
 #=================================================
 # START SERVICE
 #=================================================
-ynh_systemctl --service="$app" --action="enable --now"
+ynh_systemctl --service="$app" --action="start"

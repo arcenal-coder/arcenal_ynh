@@ -27,4 +27,4 @@ ynh_exec_as_app env HOME="$install_dir" \
 
 ynh_config_add_nginx
 ynh_config_add_systemd --template="arcenal"
-ynh_systemctl --service="$app" --action="enable --now"
+ynh_systemctl --service="$app" --action="start"
