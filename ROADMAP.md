@@ -32,7 +32,9 @@ cochée qu'après validation sur une YunoHost propre.
   lance `dashboard`, transmet le préfixe YunoHost et construit les ressources
   web pour le chemin choisi lors de l'installation. Le premier test de mise à
   niveau corrige dans `0.21.0~ynh12` l'appel au helper de sauvegarde v2, dont le
-  chemin est un argument positionnel.
+  chemin est un argument positionnel. Pour permettre un accès local sans DNS
+  système pendant les tests, `0.21.0~ynh13` rend la permission configurable ;
+  elle reste réservée aux administrateurs par défaut.
 
 ## 1. État des lieux
 
