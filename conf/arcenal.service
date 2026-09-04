@@ -16,6 +16,8 @@ Environment=ARCENAL_YUNOHOST_MARKER=__DATA_DIR__/.arcenal-yunohost
 Environment=HERMES_NONINTERACTIVE=1
 # L'interface est déjà construite pendant l'installation ou la mise à niveau.
 Environment=HERMES_WEB_DIST=__INSTALL_DIR__/hermes_cli/web_dist
+# Déclare l'adresse publique servie par YunoHost pour valider l'en-tête Host.
+Environment=HERMES_DASHBOARD_PUBLIC_URL=https://__DOMAIN____PATH__
 # Les mises à jour restent pilotées par le paquet YunoHost.
 Environment=HERMES_DISABLE_UPDATE=1
 ExecStart=__INSTALL_DIR__/.venv/bin/arcenal dashboard --host 127.0.0.1 --port __PORT__ --skip-build --no-open
