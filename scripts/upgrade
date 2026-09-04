@@ -27,8 +27,10 @@ ynh_exec_as_app env \
         --directory "$install_dir" --python 3.11 --no-dev || \
     ynh_die "Failed to sync Python dependencies — check $install_dir/.local/bin/uv"
 
-ynh_exec_as_app env HOME="$install_dir" npm ci --prefix "$install_dir/web"
-ynh_exec_as_app env HOME="$install_dir" npm run build --prefix "$install_dir/web"
+ynh_exec_as_app env HOME="$install_dir" \
+    npm --prefix "$install_dir" ci --workspace web
+ynh_exec_as_app env HOME="$install_dir" \
+    npm --prefix "$install_dir" run build --workspace web
 
 # NOTE: the data dir (/var/www/$app/data — config.yaml, .env, skills, memory)
 # is intentionally left untouched by upgrades.

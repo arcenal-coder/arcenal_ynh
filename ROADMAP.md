@@ -18,7 +18,10 @@ cochée qu'après validation sur une YunoHost propre.
   épingle `uv` 0.12.9. Le second essai a détecté une version Python non conforme
   à PEP 440 ; le tag `v0.21.0-arcenal3` utilise désormais
   `0.21.0+arcenal.3`, validé dans la VM avec `uv lock --check`, et est livré par
-  le paquet `0.21.0~ynh6`.
+  le paquet `0.21.0~ynh6`. Le troisième essai a validé l'environnement Python
+  complet, puis détecté que le lockfile npm est à la racine du monorepo. Le
+  paquet `0.21.0~ynh7` utilise la ressource Node.js 22.22 de YunoHost et exécute
+  `npm ci` / `npm run build` sur le workspace `web` depuis la racine.
 
 ## 1. État des lieux
 
