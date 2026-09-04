@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Common helpers for the ARCenal Agent YunoHost package
-# YunoHost packaging v2: helpers are loaded automatically.
+# Fonctions communes du paquet YunoHost ARCenal Agent.
+# Les helpers du packaging v2 sont chargés automatiquement.
 
 readonly ARCENAL_INSTALL_DIR="/var/www/arcenal/app"
 readonly ARCENAL_DATA_DIR="/var/www/arcenal/data"     # HERMES_HOME (config.yaml, .env, skills, memory)
@@ -20,10 +20,12 @@ arcenal_install_source() {
 }
 
 arcenal_install_deps() {
-    # uv is not packaged in Debian; install it into the app dir for the app user only.
+    # Installe uv dans le dossier applicatif, entièrement sous l'utilisateur app.
     if [ ! -x "$ARCENAL_INSTALL_DIR/.local/bin/uv" ]; then
-        ynh_exec_as_app curl -LsSf https://astral.sh/uv/install.sh \
-            | YNH_APP_HOME="$ARCENAL_INSTALL_DIR" UV_INSTALL_DIR="$ARCENAL_INSTALL_DIR/.local/bin" sh
+        ynh_exec_as_app env \
+            HOME="$ARCENAL_INSTALL_DIR" \
+            UV_INSTALL_DIR="$ARCENAL_INSTALL_DIR/.local/bin" \
+            sh -c 'curl -LsSf https://astral.sh/uv/0.12.9/install.sh | sh'
     fi
     # Create the venv and install pinned dependencies (network required).
     ynh_exec_as_app env \

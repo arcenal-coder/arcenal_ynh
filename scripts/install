@@ -26,8 +26,10 @@ find "$install_dir" -type f -exec chmod 640 {} \;
 #=================================================
 # INSTALL DEPENDENCIES (uv + Python venv)
 #=================================================
-ynh_exec_as_app curl -LsSf https://astral.sh/uv/install.sh \
-    | YNH_APP_HOME="$install_dir" UV_INSTALL_DIR="$install_dir/.local/bin" sh
+ynh_exec_as_app env \
+    HOME="$install_dir" \
+    UV_INSTALL_DIR="$install_dir/.local/bin" \
+    sh -c 'curl -LsSf https://astral.sh/uv/0.12.9/install.sh | sh'
 ynh_exec_as_app env \
     HOME="$install_dir" \
     UV_PYTHON_INSTALL_DIR="$install_dir/.uv/python" \

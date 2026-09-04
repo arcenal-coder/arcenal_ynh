@@ -12,7 +12,10 @@ cochée qu'après validation sur une YunoHost propre.
   dossier temporaire privé de YunoHost. Correction publiée dans
   `0.21.0~ynh3` avec `uv sync --directory "$install_dir"`. Le nettoyage a
   ensuite identifié l'ancien helper `ynh_safe_remove`, retiré dans
-  `0.21.0~ynh4` au profit de la déprovision automatique des ressources v2.
+  `0.21.0~ynh4` au profit de la déprovision automatique des ressources v2. Le
+  pipe d'installation de `uv` exécutait son côté droit sous root ; `0.21.0~ynh5`
+  place désormais l'ensemble du pipeline sous l'utilisateur applicatif et
+  épingle `uv` 0.12.9.
 
 ## 1. État des lieux
 
