@@ -10,7 +10,7 @@ readonly ARCENAL_SERVICE_NAME="arcenal"
 # Retourne la version figée de l'archive source ARCenal Agent.
 # Le manifeste épingle aussi son empreinte afin de garantir la reproductibilité.
 arcenal_get_source_version() {
-    echo "0.21.0-arcenal4"
+    echo "0.21.0-arcenal5"
 }
 
 arcenal_install_source() {

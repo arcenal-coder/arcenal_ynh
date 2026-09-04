@@ -7,7 +7,7 @@ name = "ARCenal Agent"
 description."en" = "Self-hosted AI agent (fork of Hermes Agent by Nous Research), served as a web app on your YunoHost server"
 description."fr" = "Agent IA auto-hébergé (fork de Hermes Agent de Nous Research), servi comme application web sur votre serveur YunoHost"
 
-version = "0.21.0~ynh13"
+version = "0.21.0~ynh14"
 
 maintainers = ["compteonyx"]
 
@@ -93,5 +93,5 @@ ram.runtime = "1G"
 
     [resources.sources]
         [resources.sources.main]
-        url = "https://github.com/arcenal-coder/arcenal-agent/archive/refs/tags/v0.21.0-arcenal4.tar.gz"
-        sha256 = "f78f3e51e7624470be9c3eb0c1b1b16f1cab997f1c8bf705a510c1d34b628b56"
+        url = "https://github.com/arcenal-coder/arcenal-agent/archive/refs/tags/v0.21.0-arcenal5.tar.gz"
+        sha256 = "663f9e983be31516aec8abc199e01bca754d123bc42627fa0200c92c3546c033"

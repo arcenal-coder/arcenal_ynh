@@ -1,24 +1,24 @@
 #!/bin/bash
 
-# ARCenal Agent upgrade script (YunoHost packaging v2)
-# Replaces the upstream `hermes update` mechanism entirely:
-# versions are managed by YunoHost, never by git pull inside the app dir.
+# Mise à niveau d'ARCenal Agent avec le packaging YunoHost v2.
+# Les versions sont gérées par YunoHost afin de conserver une base Hermes
+# commune et facilement actualisable.
 
 source /usr/share/yunohost/helpers
 
 #=================================================
-# STOP SERVICE
+# ARRÊT DU SERVICE
 #=================================================
 ynh_systemctl --service="$app" --action="stop"
 
 #=================================================
-# DOWNLOAD NEW SOURCES
+# RÉCUPÉRATION DES NOUVELLES SOURCES
 #=================================================
 ynh_setup_source --dest_dir="$install_dir"
 chown -R "$app:" "$install_dir"
 
 #=================================================
-# UPGRADE DEPENDENCIES
+# MISE À JOUR DES DÉPENDANCES
 #=================================================
 ynh_exec_as_app env \
     HOME="$install_dir" \
@@ -33,12 +33,13 @@ web_base="${path%/}/"
 ynh_exec_as_app env HOME="$install_dir" \
     npm --prefix "$install_dir" run build --workspace web -- --base="$web_base"
 
-# NOTE: the data dir (/var/www/$app/data — config.yaml, .env, skills, memory)
-# is intentionally left untouched by upgrades.
+# Le dossier de données (configuration, secrets, compétences et mémoire)
+# reste volontairement intact pendant les mises à niveau.
 
 #=================================================
-# REAPPLY CONFIGS & RESTART
+# RÉAPPLICATION DES CONFIGURATIONS ET REDÉMARRAGE
 #=================================================
 ynh_config_add_nginx
+ynh_permission_url --permission="main" --url="$domain$path" --auth_header=true
 ynh_config_add_systemd --template="arcenal.service"
 ynh_systemctl --service="$app" --action="restart"

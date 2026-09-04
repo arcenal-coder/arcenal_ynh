@@ -1,37 +1,89 @@
 #!/bin/bash
 
-# ARCenal Agent config script (YunoHost packaging v2)
-# Applies config panel changes to the agent's config.yaml / .env,
-# replacing any need to run the interactive `hermes setup` wizard.
+# Panneau de configuration ARCenal pour le packaging YunoHost v2.
+# Les lectures n'altèrent jamais la configuration et les écritures passent
+# par des fonctions dédiées afin de préserver les valeurs contenant un « / ».
 
 source /usr/share/yunohost/helpers
+ynh_abort_if_errors
 
 data_dir="/var/www/$app/data"
+config_file="$data_dir/config.yaml"
+env_file="$data_dir/.env"
 
-changed_provider=$([ -n "${provider:-}" ] && echo 1 || echo 0)
-changed_model=$([ -n "${model:-}" ] && echo 1 || echo 0)
-changed_api_key=$([ -n "${api_key:-}" ] && echo 1 || echo 0)
+get_yaml_value() {
+    local key="$1"
+    awk -v key="$key" '$1 == key ":" { print $2; exit }' "$config_file"
+}
 
-if [ "$changed_provider" = "1" ] || [ "$changed_model" = "1" ]; then
-    current_provider=$(grep -E '^provider:' "$data_dir/config.yaml" | awk '{print $2}')
-    current_model=$(grep -E '^model:' "$data_dir/config.yaml" | awk '{print $2}')
-    new_provider="${provider:-$current_provider}"
-    new_model="${model:-$current_model}"
+set_yaml_value() {
+    local key="$1"
+    local value="$2"
+    local temporary_file
+    temporary_file="$(mktemp)"
 
-    sed -i "s/^provider:.*/provider: $new_provider/" "$data_dir/config.yaml"
-    sed -i "s/^model:.*/model: $new_model/" "$data_dir/config.yaml"
-fi
+    awk -v key="$key" -v value="$value" '
+        BEGIN { updated = 0 }
+        $1 == key ":" { print key ": " value; updated = 1; next }
+        { print }
+        END { if (!updated) print key ": " value }
+    ' "$config_file" > "$temporary_file"
 
-if [ "$changed_api_key" = "1" ]; then
-    provider_env="$(grep -E '^provider:' "$data_dir/config.yaml" | awk '{print $2}' | tr '[:lower:]-' '[:upper:]_')"
-    printf '%s_API_KEY=%s\n' "$provider_env" "$api_key" > "$data_dir/.env"
-    chmod 600 "$data_dir/.env"
-fi
+    install -o "$app" -g "$app" -m 600 "$temporary_file" "$config_file"
+    rm -f "$temporary_file"
+}
 
-if [ "${enabled:-}" = "true" ]; then
-    ynh_systemctl --service="$app-gateway" --action="enable --now" || \
-        ynh_print_warn "Gateway service not yet packaged — configure gateways manually."
-fi
+getter__provider() {
+    get_yaml_value provider
+}
 
-# Restart the main service to pick up config changes
-ynh_systemctl --service="$app" --action="restart"
+setter__provider() {
+    set_yaml_value provider "$provider"
+}
+
+getter__model() {
+    get_yaml_value model
+}
+
+setter__model() {
+    set_yaml_value model "$model"
+}
+
+validate__model() {
+    if [[ "$model" == *$'\n'* ]] || [ -z "$model" ]; then
+        echo "Le nom du modèle doit tenir sur une seule ligne et ne peut pas être vide."
+    fi
+}
+
+getter__api_key() {
+    # Une clé secrète n'est jamais renvoyée vers l'interface d'administration.
+    echo '""'
+}
+
+setter__api_key() {
+    if [ -n "$api_key" ]; then
+        local provider_env
+        provider_env="$(get_yaml_value provider | tr '[:lower:]-' '[:upper:]_')"
+        printf '%s_API_KEY=%s\n' "$provider_env" "$api_key" > "$env_file"
+        chown "$app:$app" "$env_file"
+        chmod 600 "$env_file"
+    fi
+}
+
+getter__enabled() {
+    systemctl is-enabled --quiet "$app-gateway" 2>/dev/null && echo true || echo false
+}
+
+setter__enabled() {
+    if [ "$enabled" = "true" ]; then
+        ynh_print_warn "Le service de passerelles sera proposé dans une prochaine version ARCenal."
+    fi
+}
+
+ynh_app_config_apply() {
+    _ynh_app_config_apply
+    chown -R "$app:$app" "$data_dir"
+    ynh_systemctl --service="$app" --action="restart"
+}
+
+ynh_app_config_run "$1"
