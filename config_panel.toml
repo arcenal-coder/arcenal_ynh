@@ -6,11 +6,11 @@ version = "1.0"
 name.en = "ARCenal Agent"
 name.fr = "ARCenal Agent"
 
-    [main.model]
+    [main.model_settings]
     name.en = "Model provider"
     name.fr = "Fournisseur de modèles"
 
-        [main.model.provider]
+        [main.model_settings.provider]
         ask.en = "Provider"
         ask.fr = "Fournisseur"
         type = "select"
@@ -18,7 +18,7 @@ name.fr = "ARCenal Agent"
         choices = ["nous-portal", "openrouter", "openai", "anthropic", "custom"]
         default = "openrouter"
 
-        [main.model.model]
+        [main.model_settings.model]
         ask.en = "Default model"
         ask.fr = "Modèle par défaut"
         type = "string"
