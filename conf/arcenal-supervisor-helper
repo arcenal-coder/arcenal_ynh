@@ -19,7 +19,7 @@ case "$operation" in
         ;;
     restart-service)
         case "$target" in
-            arcenal|nginx|yunohost-api|yunohost-portal-api|slapd|redis-server)
+            arcenal|nginx|yunohost-api|yunohost-portal-api|slapd)
                 systemctl restart "$target"
                 systemctl is-active "$target"
                 ;;
