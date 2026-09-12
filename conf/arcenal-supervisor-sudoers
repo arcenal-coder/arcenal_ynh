@@ -1,0 +1,2 @@
+# ARCenal Agent ne peut lancer que son helper à liste blanche, sans shell libre.
+__APP__ ALL=(root) NOPASSWD: /usr/local/sbin/arcenal-supervisor-helper *

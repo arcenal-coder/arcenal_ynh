@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Helper privilégié ARCenal : aucune commande arbitraire n’est acceptée.
+set -euo pipefail
+
+operation="${1:-}"
+target="${2:-}"
+
+case "$operation" in
+    refresh-diagnostics)
+        test -z "$target"
+        yunohost diagnosis run --force
+        ;;
+    reload-nginx)
+        test -z "$target"
+        nginx -t
+        systemctl reload nginx
+        echo "Configuration Nginx validée et service rechargé."
+        ;;
+    restart-service)
+        case "$target" in
+            arcenal|nginx|yunohost-api|yunohost-portal-api|slapd|redis-server)
+                systemctl restart "$target"
+                systemctl is-active "$target"
+                ;;
+            *)
+                echo "Service non autorisé." >&2
+                exit 64
+                ;;
+        esac
+        ;;
+    *)
+        echo "Opération non autorisée." >&2
+        exit 64
+        ;;
+esac

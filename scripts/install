@@ -20,6 +20,12 @@ chown -R "$app:" "$install_dir"
 find "$install_dir" -type d -exec chmod 750 {} \;
 find "$install_dir" -type f -exec chmod 640 {} \;
 
+# Installe le canal de maintenance à privilèges strictement bornés.
+install -o root -g root -m 0755 ../conf/arcenal-supervisor-helper /usr/local/sbin/arcenal-supervisor-helper
+sed "s/__APP__/$app/g" ../conf/arcenal-supervisor-sudoers > "/etc/sudoers.d/$app-supervisor"
+chmod 0440 "/etc/sudoers.d/$app-supervisor"
+visudo -cf "/etc/sudoers.d/$app-supervisor"
+
 #=================================================
 # INSTALLATION DES DÉPENDANCES (uv + environnement Python)
 #=================================================

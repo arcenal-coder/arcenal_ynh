@@ -10,3 +10,5 @@ if systemctl list-unit-files "$app.service" --no-legend 2>/dev/null | grep -q "$
     ynh_systemctl --service="$app" --action="stop"
 fi
 yunohost service remove "$app" || true
+rm -f "/etc/sudoers.d/$app-supervisor"
+rm -f /usr/local/sbin/arcenal-supervisor-helper
