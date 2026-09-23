@@ -59,8 +59,9 @@ chmod 600 "$data_dir/.arcenal-yunohost"
 
 cat > "$data_dir/config.yaml" <<EOF
 # Géré par YunoHost (application arcenal).
-provider: $provider
-model: $model
+model:
+  provider: $provider
+  default: $model
 terminal:
   backend: local
 EOF

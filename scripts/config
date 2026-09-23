@@ -6,47 +6,26 @@
 
 source /usr/share/yunohost/helpers
 ynh_abort_if_errors
+source "$(dirname "$0")/model_config.sh"
 
 data_dir="/var/www/$app/data"
 config_file="$data_dir/config.yaml"
 env_file="$data_dir/.env"
 
-get_yaml_value() {
-    local key="$1"
-    awk -v key="$key" '$1 == key ":" { print $2; exit }' "$config_file"
-}
-
-set_yaml_value() {
-    local key="$1"
-    local value="$2"
-    local temporary_file
-    temporary_file="$(mktemp)"
-
-    awk -v key="$key" -v value="$value" '
-        BEGIN { updated = 0 }
-        $1 == key ":" { print key ": " value; updated = 1; next }
-        { print }
-        END { if (!updated) print key ": " value }
-    ' "$config_file" > "$temporary_file"
-
-    install -o "$app" -g "$app" -m 600 "$temporary_file" "$config_file"
-    rm -f "$temporary_file"
-}
-
 getter__provider() {
-    get_yaml_value provider
+    arcenal_model_get "$config_file" provider
 }
 
 setter__provider() {
-    set_yaml_value provider "$provider"
+    arcenal_model_set "$config_file" provider "$provider" "$app" "$app"
 }
 
 getter__model() {
-    get_yaml_value model
+    arcenal_model_get "$config_file" default
 }
 
 setter__model() {
-    set_yaml_value model "$model"
+    arcenal_model_set "$config_file" default "$model" "$app" "$app"
 }
 
 validate__model() {
@@ -63,7 +42,7 @@ getter__api_key() {
 setter__api_key() {
     if [ -n "$api_key" ]; then
         local provider_env
-        provider_env="$(get_yaml_value provider | tr '[:lower:]-' '[:upper:]_')"
+        provider_env="$(arcenal_model_get "$config_file" provider | tr '[:lower:]-' '[:upper:]_')"
         printf '%s_API_KEY=%s\n' "$provider_env" "$api_key" > "$env_file"
         chown "$app:$app" "$env_file"
         chmod 600 "$env_file"

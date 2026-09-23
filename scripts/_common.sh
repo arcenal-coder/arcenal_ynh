@@ -10,7 +10,7 @@ readonly ARCENAL_SERVICE_NAME="arcenal"
 # Retourne la version figée de l'archive source ARCenal Agent.
 # Le manifeste épingle aussi son empreinte afin de garantir la reproductibilité.
 arcenal_get_source_version() {
-    echo "0.21.0-arcenal9"
+    echo "0.21.0-arcenal10"
 }
 
 arcenal_install_source() {
@@ -47,8 +47,9 @@ arcenal_write_config() {
     cat > "$ARCENAL_DATA_DIR/config.yaml" <<EOF
 # Managed by YunoHost (arcenal app). Manual edits may be overwritten
 # by the config panel; use `yunohost app config set arcenal` instead.
-provider: $provider
-model: $model
+model:
+  provider: $provider
+  default: $model
 terminal:
   backend: local
 EOF

@@ -10,7 +10,7 @@
 ## Routine
 
 ```bash
-yunohost app config set arcenal -a "main.model.model=anthropic/claude-sonnet-4"
+yunohost app config set arcenal -a "main.model_settings.provider=anthropic&main.model_settings.model=anthropic/claude-sonnet-4"
 tail -f /var/log/arcenal/arcenal.log          # or journalctl -u arcenal -f
 yunohost app upgrade arcenal
 yunohost app backup arcenal
@@ -29,6 +29,10 @@ The upstream `hermes update` / `arcenal update` mechanism is **bypassed**: upgra
 are driven by YunoHost's `upgrade` script, which re-downloads a pinned source
 archive. Never run `arcenal update` on the server — the install is not a git
 checkout and the command will refuse or fail harmlessly.
+
+La mise à niveau vers `0.21.0~ynh22` convertit automatiquement l'ancien format
+de configuration du modèle. Après la mise à niveau, le fournisseur et le modèle
+se trouvent sous `model.provider` et `model.default` dans `config.yaml`.
 
 ## Gateways (Telegram, Discord, ...)
 

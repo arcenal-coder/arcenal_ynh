@@ -1,12 +1,18 @@
 # ARCenal Agent — état, décisions et feuille de route
 
-Dernière revue : **2026-09-04**. Ce document est le point de reprise commun pour
+Dernière revue : **2026-09-23**. Ce document est le point de reprise commun pour
 Damien et les autres contributeurs. Il décrit l'état observé dans les dépôts,
 les décisions déjà prises et l'ordre de réalisation. Une case ne doit être
 cochée qu'après validation sur une YunoHost propre.
 
 ### Journal de validation
 
+- **2026-09-23 — paquet `0.21.0~ynh22` :** correction du format de configuration
+  des fournisseurs de modèles. Les installations neuves écrivent désormais
+  `model.provider` et `model.default`. La mise à niveau convertit les anciennes
+  clés racine sans exposer la clé API et refuse une configuration historique
+  incomplète. Le test shell couvre installation historique, migration,
+  modification du modèle, idempotence et rejet.
 - **2026-09-04 — YunoHost 12.1.41.2, Debian 12 ARM64, VM Lima :** première
   installation arrêtée lors de `uv sync`, car son répertoire courant était le
   dossier temporaire privé de YunoHost. Correction publiée dans

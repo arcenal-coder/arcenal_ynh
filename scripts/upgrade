@@ -5,6 +5,10 @@
 # commune et facilement actualisable.
 
 source /usr/share/yunohost/helpers
+source "$(dirname "$0")/model_config.sh"
+
+data_dir="/var/www/$app/data"
+config_file="$data_dir/config.yaml"
 
 #=================================================
 # ARRÊT DU SERVICE
@@ -41,6 +45,8 @@ ynh_exec_as_app env HOME="$install_dir" \
 
 # Le dossier de données (configuration, secrets, compétences et mémoire)
 # reste volontairement intact pendant les mises à niveau.
+arcenal_model_migrate_legacy "$config_file" "$app" "$app" || \
+    ynh_die "La configuration historique du modèle est invalide."
 
 #=================================================
 # RÉAPPLICATION DES CONFIGURATIONS ET REDÉMARRAGE
