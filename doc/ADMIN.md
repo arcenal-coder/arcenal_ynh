@@ -5,7 +5,10 @@
 - **App dir**: `/var/www/arcenal/app` — sources, venv (uv, Python 3.11), built web UI
 - **Data dir**: `/var/www/arcenal/data` (`HERMES_HOME`) — `config.yaml`, `.env`, skills, memory, logs
 - **Service**: `systemctl status arcenal` — runs `arcenal serve` (FastAPI web UI) on 127.0.0.1:9119
-- **Reverse proxy**: nginx, exposed at the domain/path chosen at install; protected by YunoHost SSO (`init_main_permission`)
+- **Reverse proxy** : nginx, exposé sur le domaine et le chemin choisis ; les
+  trois volets d'administration sont réservés au groupe `admins` de YunoHost.
+- **Wiki QSSERP** : route `/wiki`, accessible aux comptes YunoHost du groupe
+  `all_users` ; les brouillons et les API d'administration restent interdits.
 
 ## Routine
 
@@ -30,9 +33,9 @@ are driven by YunoHost's `upgrade` script, which re-downloads a pinned source
 archive. Never run `arcenal update` on the server — the install is not a git
 checkout and the command will refuse or fail harmlessly.
 
-La mise à niveau vers `0.21.0~ynh22` convertit automatiquement l'ancien format
-de configuration du modèle. Après la mise à niveau, le fournisseur et le modèle
-se trouvent sous `model.provider` et `model.default` dans `config.yaml`.
+La mise à niveau vers `0.21.0~ynh24` installe l'interface ARC à trois volets,
+le coffre documentaire et le wiki QSSERP. Le fournisseur et le modèle restent
+sous `model.provider` et `model.default` dans `config.yaml`.
 
 ## Gateways (Telegram, Discord, ...)
 

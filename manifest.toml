@@ -7,7 +7,7 @@ name = "ARCenal Agent"
 description."en" = "AI supervisor for ARCenal System, based on Hermes Agent by Nous Research"
 description."fr" = "Superviseur IA d’ARCenal Système, basé sur Hermes Agent de Nous Research"
 
-version = "0.21.0~ynh23"
+version = "0.21.0~ynh24"
 
 maintainers = ["compteonyx"]
 
@@ -38,10 +38,6 @@ ram.runtime = "1G"
 
     [install.admin]
     type = "user"
-
-    [install.init_main_permission]
-    type = "group"
-    default = "admins"
 
     [install.provider]
     ask.en = "Choose the default model provider"
@@ -79,8 +75,20 @@ ram.runtime = "1G"
 
     [resources.permissions]
     main.url = "/"
+    main.allowed = "admins"
     main.auth_header = true
     main.protected = false
+    wiki.url = "/wiki"
+    wiki.additional_urls = [
+        "/assets",
+        "/arcenal-logo.png",
+        "/api/plugins/arcenal-supervisor/knowledge/wiki/overview",
+        "/api/plugins/arcenal-supervisor/knowledge/wiki/document",
+    ]
+    wiki.allowed = "all_users"
+    wiki.auth_header = true
+    wiki.protected = false
+    wiki.show_tile = true
 
     [resources.ports]
     main.default = 9119
@@ -93,5 +101,5 @@ ram.runtime = "1G"
 
     [resources.sources]
         [resources.sources.main]
-        url = "https://github.com/arcenal-coder/arcenal-agent/archive/refs/tags/v0.21.0-arcenal10.tar.gz"
-        sha256 = "ee2a5b6f8f528ab3a26d8c7e1f1081dce3351493aa8ca6aad44eaa42d467c586"
+        url = "https://github.com/arcenal-coder/arcenal-agent/archive/refs/tags/v0.21.0-arcenal11.tar.gz"
+        sha256 = "026be18df7dec389765b51cbe818c056989b950d64f90d38066eef494de807c8"

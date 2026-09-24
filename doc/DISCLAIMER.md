@@ -5,7 +5,8 @@ agent whose core feature is running shell commands and editing files on the host
 under the dedicated unprivileged `arcenal` system user. Anyone with access to the
 web UI can instruct the agent to act on the server.
 
-- Restrict access via YunoHost's permission system at install time (default: `admins` only).
+- The administration permission is fixed to YunoHost's `admins` group.
+- The separate wiki permission is initialized for `all_users` and exposes only approved documents.
 - Data dir `/var/www/arcenal/data/.env` holds your provider API keys (chmod 600).
 - For stronger isolation, configure a containerized terminal backend instead of `local`.
 
