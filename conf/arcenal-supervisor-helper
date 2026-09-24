@@ -29,6 +29,23 @@ case "$operation" in
                 ;;
         esac
         ;;
+    yunohost-query)
+        case "$target" in
+            version)
+                yunohost --version
+                ;;
+            apps)
+                yunohost app list --output-as json
+                ;;
+            services)
+                yunohost service status --output-as json
+                ;;
+            *)
+                echo "Ressource YunoHost non autorisée." >&2
+                exit 64
+                ;;
+        esac
+        ;;
     *)
         echo "Opération non autorisée." >&2
         exit 64
