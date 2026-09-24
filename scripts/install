@@ -77,7 +77,7 @@ chown -R "$app:" "$data_dir"
 # CONFIGURATION NGINX
 #=================================================
 ynh_config_add_nginx
-ynh_permission_url --permission="main" --url="$domain$path" --auth_header=true
+ynh_permission_url --permission="main" --url="/" --auth_header=true
 
 #=================================================
 # CONFIGURATION SYSTEMD

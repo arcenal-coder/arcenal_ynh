@@ -52,6 +52,6 @@ arcenal_model_migrate_legacy "$config_file" "$app" "$app" || \
 # RÉAPPLICATION DES CONFIGURATIONS ET REDÉMARRAGE
 #=================================================
 ynh_config_add_nginx
-ynh_permission_url --permission="main" --url="$domain$path" --auth_header=true
+ynh_permission_url --permission="main" --url="/" --auth_header=true
 ynh_config_add_systemd --template="arcenal.service"
 ynh_systemctl --service="$app" --action="restart"
