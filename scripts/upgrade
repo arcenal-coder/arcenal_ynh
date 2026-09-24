@@ -35,11 +35,8 @@ visudo -cf "/etc/sudoers.d/$app-supervisor"
 # l'exécutable uv. Le helper commun le réinstalle avant de synchroniser Python.
 arcenal_install_deps
 
-ynh_exec_as_app env HOME="$install_dir" \
-    npm --prefix "$install_dir" ci --workspace web
 web_base="${path%/}/"
-ynh_exec_as_app env HOME="$install_dir" \
-    npm --prefix "$install_dir" run build --workspace web -- --base="$web_base"
+arcenal_build_interfaces "$web_base"
 
 # Le dossier de données (configuration, secrets, compétences et mémoire)
 # reste volontairement intact pendant les mises à niveau.

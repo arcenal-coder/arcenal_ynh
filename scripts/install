@@ -6,6 +6,7 @@
 # IMPORT DES OUTILS YUNOHOST
 #=================================================
 source /usr/share/yunohost/helpers
+source "$(dirname "$0")/_common.sh"
 
 #=================================================
 # RÉCUPÉRATION DES SOURCES
@@ -39,12 +40,9 @@ ynh_exec_as_app env \
     "$install_dir/.local/bin/uv" sync \
         --directory "$install_dir" --python 3.11 --no-dev
 
-# Construit l'interface depuis la racine du monorepo, où se trouve le lockfile.
+# Construit les interfaces depuis la racine du monorepo, où se trouve le lockfile.
 web_base="${path%/}/"
-ynh_exec_as_app env HOME="$install_dir" \
-    npm --prefix "$install_dir" ci --workspace web
-ynh_exec_as_app env HOME="$install_dir" \
-    npm --prefix "$install_dir" run build --workspace web -- --base="$web_base"
+arcenal_build_interfaces "$web_base"
 
 #=================================================
 # CONFIGURATION NON INTERACTIVE

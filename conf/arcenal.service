@@ -8,8 +8,12 @@ User=__APP__
 Group=__APP__
 WorkingDirectory=__INSTALL_DIR__
 Environment=HOME=__DATA_DIR__
+# Le chemin Node fourni par la ressource YunoHost doit aussi exister au runtime.
+Environment="PATH=__PATH_WITH_NODEJS__"
 # Place le dossier personnel de l'agent dans les données persistantes.
 Environment=HERMES_HOME=__DATA_DIR__
+# Utilise le terminal préconstruit par le paquet, sans installation au premier chat.
+Environment=HERMES_TUI_DIR=__INSTALL_DIR__/ui-tui
 # ARCenal vérifie ce marqueur du paquet avant d'exécuter le code Hermes.
 Environment=ARCENAL_YUNOHOST_MARKER=__DATA_DIR__/.arcenal-yunohost
 # Interdit les assistants interactifs dans le service.

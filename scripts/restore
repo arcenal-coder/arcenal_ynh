@@ -28,11 +28,8 @@ chmod 0440 "/etc/sudoers.d/$app-supervisor"
 visudo -cf "/etc/sudoers.d/$app-supervisor"
 arcenal_install_deps
 
-ynh_exec_as_app env HOME="$install_dir" \
-    npm --prefix "$install_dir" ci --workspace web
 web_base="${path%/}/"
-ynh_exec_as_app env HOME="$install_dir" \
-    npm --prefix "$install_dir" run build --workspace web -- --base="$web_base"
+arcenal_build_interfaces "$web_base"
 
 ynh_config_add_nginx
 ynh_config_add_systemd --template="arcenal.service"

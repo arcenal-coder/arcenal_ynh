@@ -34,6 +34,20 @@ arcenal_install_deps() {
             --directory "$ARCENAL_INSTALL_DIR" --python 3.11 --no-dev
 }
 
+arcenal_build_interfaces() {
+    local web_base="$1"
+
+    # Le chat doit être prêt avant le démarrage : aucun téléchargement npm
+    # ne doit dépendre de la première connexion d'un administrateur.
+    ynh_exec_as_app env HOME="$ARCENAL_INSTALL_DIR" \
+        npm --prefix "$ARCENAL_INSTALL_DIR" ci \
+            --workspace web --workspace ui-tui --include-workspace-root --include=dev
+    ynh_exec_as_app env HOME="$ARCENAL_INSTALL_DIR" \
+        npm --prefix "$ARCENAL_INSTALL_DIR" run build --workspace ui-tui
+    ynh_exec_as_app env HOME="$ARCENAL_INSTALL_DIR" \
+        npm --prefix "$ARCENAL_INSTALL_DIR" run build --workspace web -- --base="$web_base"
+}
+
 arcenal_write_config() {
     # $1 = provider, $2 = api key, $3 = model
     local provider="$1"
