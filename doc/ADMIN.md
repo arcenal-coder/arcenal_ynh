@@ -33,9 +33,9 @@ are driven by YunoHost's `upgrade` script, which re-downloads a pinned source
 archive. Never run `arcenal update` on the server — the install is not a git
 checkout and the command will refuse or fail harmlessly.
 
-La mise à niveau vers `0.21.0~ynh24` installe l'interface ARC à trois volets,
-le coffre documentaire et le wiki QSSERP. Le fournisseur et le modèle restent
-sous `model.provider` et `model.default` dans `config.yaml`.
+La mise à niveau vers `0.21.0~ynh25` ajoute le menu secondaire Paramètres. Il
+permet de connecter OpenRouter, de tester la clé et de sélectionner le modèle
+principal sans manipuler `.env` ou `config.yaml` manuellement.
 
 ## Gateways (Telegram, Discord, ...)
 
