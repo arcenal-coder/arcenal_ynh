@@ -3,8 +3,16 @@
 # Restauration d'ARCenal Agent avec le packaging YunoHost v2.
 
 source /usr/share/yunohost/helpers
+source "$(dirname "$0")/_common.sh"
 
-ynh_restore_file --origin_path="/var/www/$app/data"
+# YunoHost exclut les données applicatives de la sauvegarde automatique qui
+# précède une mise à niveau. Elles restent alors en place et leur absence dans
+# l'archive ne doit pas faire échouer la restauration du cœur applicatif.
+ynh_restore_file --origin_path="/var/www/$app/data" --not_mandatory
+
+if [ ! -d "/var/www/$app/data" ]; then
+    ynh_die "Le dossier de données ARCenal est absent après la restauration."
+fi
 
 # Les sauvegardes antérieures au garde YunoHost ne contiennent pas ce marqueur.
 printf '%s\n' 'managed-by-yunohost' > "/var/www/$app/data/.arcenal-yunohost"
@@ -18,11 +26,7 @@ install -o root -g root -m 0755 ../conf/arcenal-supervisor-helper /usr/local/sbi
 sed "s/__APP__/$app/g" ../conf/arcenal-supervisor-sudoers > "/etc/sudoers.d/$app-supervisor"
 chmod 0440 "/etc/sudoers.d/$app-supervisor"
 visudo -cf "/etc/sudoers.d/$app-supervisor"
-ynh_exec_as_app env \
-    HOME="$install_dir" \
-    UV_PYTHON_INSTALL_DIR="$install_dir/.uv/python" \
-    "$install_dir/.local/bin/uv" sync \
-        --directory "$install_dir" --python 3.11 --no-dev
+arcenal_install_deps
 
 ynh_exec_as_app env HOME="$install_dir" \
     npm --prefix "$install_dir" ci --workspace web

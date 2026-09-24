@@ -5,6 +5,7 @@
 # commune et facilement actualisable.
 
 source /usr/share/yunohost/helpers
+source "$(dirname "$0")/_common.sh"
 source "$(dirname "$0")/model_config.sh"
 
 data_dir="/var/www/$app/data"
@@ -18,7 +19,7 @@ ynh_systemctl --service="$app" --action="stop"
 #=================================================
 # RÉCUPÉRATION DES NOUVELLES SOURCES
 #=================================================
-ynh_setup_source --dest_dir="$install_dir"
+ynh_setup_source --dest_dir="$install_dir" --full_replace
 chown -R "$app:" "$install_dir"
 
 # Réinstalle le helper et sa règle à chaque mise à niveau du paquet.
@@ -30,12 +31,9 @@ visudo -cf "/etc/sudoers.d/$app-supervisor"
 #=================================================
 # MISE À JOUR DES DÉPENDANCES
 #=================================================
-ynh_exec_as_app env \
-    HOME="$install_dir" \
-    UV_PYTHON_INSTALL_DIR="$install_dir/.uv/python" \
-    "$install_dir/.local/bin/uv" sync \
-        --directory "$install_dir" --python 3.11 --no-dev || \
-    ynh_die "Failed to sync Python dependencies — check $install_dir/.local/bin/uv"
+# Une installation ancienne ou une restauration interrompue peut ne plus avoir
+# l'exécutable uv. Le helper commun le réinstalle avant de synchroniser Python.
+arcenal_install_deps
 
 ynh_exec_as_app env HOME="$install_dir" \
     npm --prefix "$install_dir" ci --workspace web

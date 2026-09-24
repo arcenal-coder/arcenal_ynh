@@ -26,7 +26,7 @@ arcenal_install_deps() {
             UV_INSTALL_DIR="$ARCENAL_INSTALL_DIR/.local/bin" \
             sh -c 'curl -LsSf https://astral.sh/uv/0.12.9/install.sh | sh'
     fi
-    # Create the venv and install pinned dependencies (network required).
+    # Crée l'environnement Python et installe les dépendances verrouillées.
     ynh_exec_as_app env \
         HOME="$ARCENAL_INSTALL_DIR" \
         UV_PYTHON_INSTALL_DIR="$ARCENAL_INSTALL_DIR/.uv/python" \
