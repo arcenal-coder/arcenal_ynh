@@ -33,14 +33,16 @@ are driven by YunoHost's `upgrade` script, which re-downloads a pinned source
 archive. Never run `arcenal update` on the server — the install is not a git
 checkout and the command will refuse or fail harmlessly.
 
-La mise à niveau vers `0.21.0~ynh28` ajoute le menu secondaire Paramètres. Il
-permet de connecter OpenRouter, de tester la clé et de sélectionner le modèle
-principal sans manipuler `.env` ou `config.yaml` manuellement. Cette révision
+La mise à niveau vers `0.21.0~ynh29` remplace le terminal par le chat natif ARC
+et étend le menu Paramètres à plusieurs fournisseurs IA. Il permet de conserver
+simultanément des accès OpenRouter, OpenAI, Anthropic, Gemini, Ollama ou
+personnalisés, puis de sélectionner le modèle principal sans manipuler `.env`
+ou `config.yaml` manuellement. Cette révision
 répare également les mises à niveau d'installations anciennes auxquelles
 l'exécutable `uv` manque, la restauration automatique `BACKUP_CORE_ONLY` et
-le build de production qui compilait par erreur les tests React. Le terminal
-du chat est désormais construit avec l'application et utilise le chemin Node.js
-fourni par YunoHost, ce qui évite l'erreur `Chat unavailable: 1`.
+le build de production qui compilait par erreur les tests React. Le chat ARC
+utilise directement la passerelle de conversation et ne présente plus le
+terminal Hermes à l'administrateur.
 
 ## Gateways (Telegram, Discord, ...)
 

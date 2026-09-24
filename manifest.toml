@@ -7,7 +7,7 @@ name = "ARCenal Agent"
 description."en" = "AI supervisor for ARCenal System, based on Hermes Agent by Nous Research"
 description."fr" = "Superviseur IA d’ARCenal Système, basé sur Hermes Agent de Nous Research"
 
-version = "0.21.0~ynh28"
+version = "0.21.0~ynh29"
 
 maintainers = ["compteonyx"]
 
@@ -43,7 +43,7 @@ ram.runtime = "1G"
     ask.en = "Choose the default model provider"
     ask.fr = "Choisissez le fournisseur de modèles par défaut"
     type = "select"
-    choices = ["nous-portal", "openrouter", "openai", "anthropic", "custom"]
+    choices = ["nous-portal", "openrouter", "openai", "anthropic", "gemini", "ollama", "custom"]
     default = "openrouter"
 
     [install.api_key]
@@ -101,5 +101,5 @@ ram.runtime = "1G"
 
     [resources.sources]
         [resources.sources.main]
-        url = "https://github.com/arcenal-coder/arcenal-agent/archive/refs/tags/v0.21.0-arcenal13.tar.gz"
-        sha256 = "2868b5cca45cfb44aaa927b8f836448323e9be73d2ca7cac0c627997d6f142f5"
+        url = "https://github.com/arcenal-coder/arcenal-agent/archive/refs/tags/v0.21.0-arcenal15.tar.gz"
+        sha256 = "7f8e9aa49dc189ceaad34fc0c8572362c50781ef7e8f2ca69afe8049bed2e476"
