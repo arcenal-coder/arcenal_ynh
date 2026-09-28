@@ -55,6 +55,22 @@ class BrokerTests(unittest.TestCase):
         with self.assertRaises(broker.BrokerContractError):
             broker._command({"action_id": "service.restart", "target": "ssh"}, False)
 
+    def test_backup_creation_uses_the_yunohost_application_contract(self) -> None:
+        command = broker._command({"action_id": "arcenal.backup.create", "target": None}, False)
+
+        self.assertEqual(command, ("/usr/bin/yunohost", "backup", "create", "--apps", "arcenal"))
+
+    def test_backup_restore_accepts_only_an_archive_name(self) -> None:
+        command = broker._command({"action_id": "arcenal.backup.restore", "target": "arcenal-manual"}, False)
+
+        self.assertEqual(command, ("/usr/bin/yunohost", "backup", "restore", "arcenal-manual", "--apps", "arcenal", "--force"))
+        with self.assertRaises(broker.BrokerContractError):
+            broker._command({"action_id": "arcenal.backup.restore", "target": "../../root"}, False)
+
+    def test_backup_commands_receive_a_bounded_long_timeout(self) -> None:
+        self.assertEqual(broker._command_timeout(("/usr/bin/yunohost", "backup", "create")), 1800)
+        self.assertEqual(broker._command_timeout(("/usr/bin/systemctl", "restart", "nginx")), 120)
+
     def test_non_object_payload_is_rejected(self) -> None:
         with self.assertRaises(broker.BrokerContractError):
             broker._command(["nginx.reload"], False)
