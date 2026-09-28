@@ -6,6 +6,7 @@ from __future__ import annotations
 import grp
 import json
 import os
+import re
 import shutil
 import socketserver
 import subprocess
@@ -19,7 +20,15 @@ READ_ACTIONS: Final = {
     "yunohost.version.read": ("/usr/bin/yunohost", "--version"),
     "yunohost.apps.read": ("/usr/bin/yunohost", "app", "list", "--output-as", "json"),
     "yunohost.services.read": ("/usr/bin/yunohost", "service", "status", "--output-as", "json"),
+    "yunohost.domains.read": ("/usr/bin/yunohost", "domain", "list", "--output-as", "json"),
+    "yunohost.backups.read": ("/usr/bin/yunohost", "backup", "list", "--output-as", "json"),
+    "yunohost.users.read": ("/usr/bin/yunohost", "user", "list", "--output-as", "json"),
+    "yunohost.diagnostics.read": ("/usr/bin/yunohost", "diagnosis", "show", "--issues", "--output-as", "json"),
+    "yunohost.updates.read": ("/usr/bin/yunohost", "app", "list", "--upgradable", "--output-as", "json"),
+    "system.errors.read": ("/usr/bin/journalctl", "--priority=err", "--lines=30", "--no-pager", "--output=short-iso"),
 }
+READ_TARGET_ACTIONS: Final = frozenset({"yunohost.certificate.read"})
+DOMAIN_RE: Final = re.compile(r"^(?=.{1,253}$)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$")
 PRIVILEGED_ACTIONS: Final = {
     "yunohost.diagnosis.refresh": ("/usr/bin/yunohost", "diagnosis", "run", "--force"),
     "nginx.reload": ("/usr/local/sbin/arcenal-nginx-reload",),
@@ -36,6 +45,14 @@ def _service_command(target: object) -> tuple[str, ...]:
     return ("/usr/bin/systemctl", "restart", target)
 
 
+def _readonly_command(action_id: str, target: object) -> tuple[str, ...]:
+    if action_id in READ_ACTIONS and target is None:
+        return READ_ACTIONS[action_id]
+    if action_id in READ_TARGET_ACTIONS and isinstance(target, str) and DOMAIN_RE.fullmatch(target):
+        return ("/usr/bin/yunohost", "domain", "cert", "status", target, "--output-as", "json")
+    raise BrokerContractError("Action interdite sur le canal de lecture.")
+
+
 def _command(payload: object, readonly: bool) -> tuple[str, ...]:
     if not isinstance(payload, dict):
         raise BrokerContractError("Le message doit être un objet JSON.")
@@ -44,12 +61,10 @@ def _command(payload: object, readonly: bool) -> tuple[str, ...]:
     action_id = payload.get("action_id")
     if not isinstance(action_id, str):
         raise BrokerContractError("L'identifiant d'action est requis.")
+    if readonly:
+        return _readonly_command(action_id, payload.get("target"))
     if action_id != "service.restart" and payload.get("target") is not None:
         raise BrokerContractError("Cette action n'accepte aucune cible.")
-    if readonly:
-        if action_id not in READ_ACTIONS:
-            raise BrokerContractError("Action interdite sur le canal de lecture.")
-        return READ_ACTIONS[action_id]
     if action_id == "service.restart":
         return _service_command(payload.get("target"))
     if action_id not in PRIVILEGED_ACTIONS:

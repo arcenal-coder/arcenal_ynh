@@ -28,6 +28,21 @@ class BrokerTests(unittest.TestCase):
         with self.assertRaises(broker.BrokerContractError):
             broker._command({"action_id": "nginx.reload", "target": None}, True)
 
+    def test_read_channel_accepts_bounded_certificate_domain(self) -> None:
+        command = broker._command(
+            {"action_id": "yunohost.certificate.read", "target": "example.test"},
+            True,
+        )
+
+        self.assertEqual(command, ("/usr/bin/yunohost", "domain", "cert", "status", "example.test", "--output-as", "json"))
+
+    def test_read_channel_rejects_unsafe_certificate_target(self) -> None:
+        with self.assertRaises(broker.BrokerContractError):
+            broker._command(
+                {"action_id": "yunohost.certificate.read", "target": "../../root"},
+                True,
+            )
+
     def test_restart_accepts_only_catalogued_service(self) -> None:
         command = broker._command(
             {"action_id": "service.restart", "target": "nginx"},

@@ -6,6 +6,13 @@ broker="$(dirname "$0")/../conf/arcenal-privileged-broker"
 
 grep -Fq '"/usr/bin/yunohost", "app", "list", "--output-as", "json"' "$broker"
 grep -Fq '"/usr/bin/yunohost", "service", "status", "--output-as", "json"' "$broker"
+grep -Fq '"/usr/bin/yunohost", "domain", "list", "--output-as", "json"' "$broker"
+grep -Fq '"/usr/bin/yunohost", "backup", "list", "--output-as", "json"' "$broker"
+grep -Fq '"/usr/bin/yunohost", "user", "list", "--output-as", "json"' "$broker"
+grep -Fq '"/usr/bin/yunohost", "diagnosis", "show", "--issues", "--output-as", "json"' "$broker"
+grep -Fq '"/usr/bin/yunohost", "app", "list", "--upgradable", "--output-as", "json"' "$broker"
+grep -Fq '"/usr/bin/journalctl", "--priority=err"' "$broker"
+grep -Fq '"yunohost.certificate.read"' "$broker"
 grep -Fq '"/usr/bin/yunohost", "--version"' "$broker"
 grep -Fq 'Action interdite sur le canal de lecture.' "$broker"
 if grep -Eq 'eval|bash -c|sh -c' "$broker"; then
