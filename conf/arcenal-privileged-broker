@@ -8,9 +8,11 @@ import json
 import os
 import re
 import shutil
+import socket
 import socketserver
 import subprocess
 import threading
+from email.message import EmailMessage
 from pathlib import Path
 from typing import Final
 
@@ -30,6 +32,8 @@ READ_ACTIONS: Final = {
 READ_TARGET_ACTIONS: Final = frozenset({"yunohost.certificate.read"})
 DOMAIN_RE: Final = re.compile(r"^(?=.{1,253}$)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$")
 ARCHIVE_RE: Final = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.+-]{0,79}$")
+EMAIL_RE: Final = re.compile(r"^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,63}$")
+HOST_RE: Final = re.compile(r"^(?=.{1,253}$)[A-Za-z0-9.-]+$")
 PRIVILEGED_ACTIONS: Final = {
     "yunohost.diagnosis.refresh": ("/usr/bin/yunohost", "diagnosis", "run", "--force"),
     "nginx.reload": ("/usr/local/sbin/arcenal-nginx-reload",),
@@ -53,6 +57,17 @@ def _restore_command(target: object) -> tuple[str, ...]:
     return ("/usr/bin/yunohost", "backup", "restore", target, "--apps", "arcenal", "--force")
 
 
+def _notification_command(target: object) -> tuple[str, ...]:
+    if not isinstance(target, str) or not EMAIL_RE.fullmatch(target):
+        raise BrokerContractError("Adresse de notification non autorisée.")
+    return ("/usr/sbin/sendmail", "-f", _sender_address(), "--", target)
+
+
+def _sender_address() -> str:
+    hostname = socket.getfqdn().lower()
+    return f"arcenal@{hostname}" if HOST_RE.fullmatch(hostname) else "arcenal@localhost"
+
+
 def _readonly_command(action_id: str, target: object) -> tuple[str, ...]:
     if action_id in READ_ACTIONS and target is None:
         return READ_ACTIONS[action_id]
@@ -73,6 +88,8 @@ def _command(payload: object, readonly: bool) -> tuple[str, ...]:
         return _readonly_command(action_id, payload.get("target"))
     if action_id == "arcenal.backup.restore":
         return _restore_command(payload.get("target"))
+    if action_id == "arcenal.notification.test":
+        return _notification_command(payload.get("target"))
     if action_id != "service.restart" and payload.get("target") is not None:
         raise BrokerContractError("Cette action n'accepte aucune cible.")
     if action_id == "service.restart":
@@ -83,7 +100,23 @@ def _command(payload: object, readonly: bool) -> tuple[str, ...]:
 
 
 def _invoke(command: tuple[str, ...]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(command, capture_output=True, text=True, timeout=_command_timeout(command), check=False)
+    return subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        input=_mail_payload(command) if command[0] == "/usr/sbin/sendmail" else None,
+        timeout=_command_timeout(command),
+        check=False,
+    )
+
+
+def _mail_payload(command: tuple[str, ...]) -> str:
+    message = EmailMessage()
+    message["From"] = f"ARCenal Agent <{command[2]}>"
+    message["To"] = command[-1]
+    message["Subject"] = "ARCenal Agent — notification de test"
+    message.set_content("ARCenal Agent est en mesure de vous notifier depuis votre serveur YunoHost.\n")
+    return message.as_string()
 
 
 def _command_timeout(command: tuple[str, ...]) -> int:

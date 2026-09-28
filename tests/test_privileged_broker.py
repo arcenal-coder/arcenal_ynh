@@ -71,6 +71,25 @@ class BrokerTests(unittest.TestCase):
         self.assertEqual(broker._command_timeout(("/usr/bin/yunohost", "backup", "create")), 1800)
         self.assertEqual(broker._command_timeout(("/usr/bin/systemctl", "restart", "nginx")), 120)
 
+    def test_notification_accepts_only_a_bounded_email_address(self) -> None:
+        with patch.object(broker.socket, "getfqdn", return_value="arcenal.example.test"):
+            command = broker._command({"action_id": "arcenal.notification.test", "target": "admin@example.test"}, False)
+
+        self.assertEqual(command, ("/usr/sbin/sendmail", "-f", "arcenal@arcenal.example.test", "--", "admin@example.test"))
+        with self.assertRaises(broker.BrokerContractError):
+            broker._command({"action_id": "arcenal.notification.test", "target": "admin@example.test\nBcc:x@example.test"}, False)
+
+    def test_notification_body_contains_no_external_input_except_recipient(self) -> None:
+        command = ("/usr/sbin/sendmail", "-f", "arcenal@example.test", "--", "admin@example.test")
+        delivered = subprocess.CompletedProcess(command, 0, "", "")
+
+        with patch.object(broker.subprocess, "run", return_value=delivered) as run:
+            broker._invoke(command)
+
+        payload = run.call_args.kwargs["input"]
+        self.assertIn("ARCenal Agent est en mesure", payload)
+        self.assertIn("To: admin@example.test", payload)
+
     def test_non_object_payload_is_rejected(self) -> None:
         with self.assertRaises(broker.BrokerContractError):
             broker._command(["nginx.reload"], False)
