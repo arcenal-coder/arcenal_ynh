@@ -21,6 +21,8 @@ assert_core_only_restore_is_supported() {
     grep -Fq 'ynh_restore_file --origin_path="/var/www/$app/data" --not_mandatory' "$restore_script"
     grep -Fq 'source "$(dirname "$0")/_common.sh"' "$restore_script"
     grep -Fq 'arcenal_install_deps' "$restore_script"
+    grep -Fq 'ynh_backup "/etc/systemd/system/$app.service" --not_mandatory' "$root_dir/scripts/backup"
+    grep -Fq 'ynh_restore_file --origin_path="/etc/systemd/system/$app.service" --not_mandatory' "$restore_script"
 
     if grep -Fq '"$install_dir/.local/bin/uv" sync' "$restore_script"; then
         printf 'La restauration ne doit pas supposer que uv existe déjà.\n' >&2

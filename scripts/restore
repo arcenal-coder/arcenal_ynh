@@ -10,6 +10,8 @@ source "$(dirname "$0")/_common.sh"
 # l'archive ne doit pas faire échouer la restauration du cœur applicatif.
 ynh_restore_file --origin_path="/var/www/$app/data" --not_mandatory
 ynh_restore_file --origin_path="/var/lib/$app-control" --not_mandatory
+ynh_restore_file --origin_path="/etc/systemd/system/$app.service" --not_mandatory
+ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf" --not_mandatory
 
 if [ ! -d "/var/www/$app/data" ]; then
     ynh_die "Le dossier de données ARCenal est absent après la restauration."

@@ -7,3 +7,8 @@ source /usr/share/yunohost/helpers
 # Les sources sont retéléchargeables ; seules les données persistantes comptent.
 ynh_backup "/var/www/$app/data"
 ynh_backup "/var/lib/$app-control" --not_mandatory
+
+# La sauvegarde préalable à une mise à niveau exclut les données. Ces fichiers
+# cœur garantissent alors qu'une restauration possède un contenu effectif.
+ynh_backup "/etc/systemd/system/$app.service" --not_mandatory
+ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf" --not_mandatory
