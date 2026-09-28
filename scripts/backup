@@ -6,3 +6,4 @@ source /usr/share/yunohost/helpers
 
 # Les sources sont retéléchargeables ; seules les données persistantes comptent.
 ynh_backup "/var/www/$app/data"
+ynh_backup "/var/lib/$app-control" --not_mandatory

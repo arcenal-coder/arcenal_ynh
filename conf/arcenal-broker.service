@@ -1,0 +1,28 @@
+[Unit]
+Description=ARCenal — passerelle privilégiée
+After=network.target
+Before=__APP___control.service __APP__.service
+
+[Service]
+Type=simple
+User=root
+Group=__APP___control
+Environment=ARCENAL_CONTROL_GROUP=__APP___control
+Environment=ARCENAL_AGENT_GROUP=__APP__
+ExecStart=/usr/local/sbin/arcenal-privileged-broker
+Restart=on-failure
+RestartSec=5
+RuntimeDirectory=__APP__-control __APP__-readonly
+RuntimeDirectoryMode=0750
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+ReadWritePaths=/run/__APP__-control /run/__APP__-readonly
+
+[Install]
+WantedBy=multi-user.target

@@ -15,6 +15,8 @@ config_file="$data_dir/config.yaml"
 # ARRÊT DU SERVICE
 #=================================================
 ynh_systemctl --service="$app" --action="stop"
+ynh_systemctl --service="${app}_control" --action="stop" || true
+ynh_systemctl --service="${app}_broker" --action="stop" || true
 
 #=================================================
 # RÉCUPÉRATION DES NOUVELLES SOURCES
@@ -22,11 +24,9 @@ ynh_systemctl --service="$app" --action="stop"
 ynh_setup_source --dest_dir="$install_dir" --full_replace
 chown -R "$app:" "$install_dir"
 
-# Réinstalle le helper et sa règle à chaque mise à niveau du paquet.
-install -o root -g root -m 0755 ../conf/arcenal-supervisor-helper /usr/local/sbin/arcenal-supervisor-helper
-sed "s/__APP__/$app/g" ../conf/arcenal-supervisor-sudoers > "/etc/sudoers.d/$app-supervisor"
-chmod 0440 "/etc/sudoers.d/$app-supervisor"
-visudo -cf "/etc/sudoers.d/$app-supervisor"
+arcenal_install_control_user
+arcenal_prepare_control_state
+arcenal_install_security_bridge
 
 #=================================================
 # MISE À JOUR DES DÉPENDANCES
@@ -49,4 +49,5 @@ arcenal_model_migrate_legacy "$config_file" "$app" "$app" || \
 ynh_config_add_nginx
 ynh_permission_url --permission="main" --url="/" --auth_header=true
 ynh_config_add_systemd --template="arcenal.service"
+arcenal_start_security_bridge
 ynh_systemctl --service="$app" --action="restart"

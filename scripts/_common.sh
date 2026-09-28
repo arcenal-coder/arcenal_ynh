@@ -10,7 +10,7 @@ readonly ARCENAL_SERVICE_NAME="arcenal"
 # Retourne la version figée de l'archive source ARCenal Agent.
 # Le manifeste épingle aussi son empreinte afin de garantir la reproductibilité.
 arcenal_get_source_version() {
-    echo "0.21.0-arcenal18"
+    echo "0.21.0-arcenal19"
 }
 
 arcenal_install_source() {
@@ -46,6 +46,36 @@ arcenal_build_interfaces() {
         npm --prefix "$ARCENAL_INSTALL_DIR" run build --workspace ui-tui
     ynh_exec_as_app env HOME="$ARCENAL_INSTALL_DIR" \
         npm --prefix "$ARCENAL_INSTALL_DIR" run build --workspace web -- --base="$web_base"
+}
+
+arcenal_install_control_user() {
+    local control_user="${app}_control"
+    local web_group="${app}_web"
+    if ! ynh_system_user_exists --username="$control_user"; then
+        ynh_system_user_create --username="$control_user" --groups="$app"
+    fi
+    if ! ynh_system_group_exists --group="$web_group"; then
+        groupadd --system "$web_group"
+    fi
+    usermod -a -G "$web_group" "$control_user"
+    usermod -a -G "$web_group" www-data
+}
+
+arcenal_prepare_control_state() {
+    install -d -o "${app}_control" -g "${app}_control" -m 0700 "/var/lib/$app-control"
+}
+
+arcenal_install_security_bridge() {
+    install -o root -g root -m 0755 ../conf/arcenal-privileged-broker /usr/local/sbin/arcenal-privileged-broker
+    install -o root -g root -m 0755 ../conf/arcenal-nginx-reload /usr/local/sbin/arcenal-nginx-reload
+    rm -f /usr/local/sbin/arcenal-supervisor-helper "/etc/sudoers.d/$app-supervisor"
+    ynh_config_add_systemd --service="${app}_broker" --template="arcenal-broker.service"
+    ynh_config_add_systemd --service="${app}_control" --template="arcenal-control.service"
+}
+
+arcenal_start_security_bridge() {
+    ynh_systemctl --service="${app}_broker" --action="restart"
+    ynh_systemctl --service="${app}_control" --action="restart"
 }
 
 arcenal_write_config() {

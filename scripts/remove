@@ -9,6 +9,16 @@ source /usr/share/yunohost/helpers
 if systemctl list-unit-files "$app.service" --no-legend 2>/dev/null | grep -q "$app.service"; then
     ynh_systemctl --service="$app" --action="stop"
 fi
+ynh_systemctl --service="${app}_control" --action="stop" || true
+ynh_systemctl --service="${app}_broker" --action="stop" || true
 yunohost service remove "$app" || true
+ynh_config_remove_systemd --service="${app}_control" || true
+ynh_config_remove_systemd --service="${app}_broker" || true
+gpasswd -d www-data "${app}_web" || true
+gpasswd -d "${app}_control" "${app}_web" || true
+ynh_system_user_delete --username="${app}_control" || true
+groupdel "${app}_web" || true
 rm -f "/etc/sudoers.d/$app-supervisor"
 rm -f /usr/local/sbin/arcenal-supervisor-helper
+rm -f /usr/local/sbin/arcenal-privileged-broker
+rm -f /usr/local/sbin/arcenal-nginx-reload

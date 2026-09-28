@@ -22,17 +22,19 @@ Environment=HERMES_NONINTERACTIVE=1
 Environment=HERMES_WEB_DIST=__INSTALL_DIR__/hermes_cli/web_dist
 # Les mises à jour restent pilotées par le paquet YunoHost.
 Environment=HERMES_DISABLE_UPDATE=1
+# La surface ARC exclut le terminal, les processus et les fichiers arbitraires.
+Environment=HERMES_TUI_TOOLSETS=arcenal-admin
+Environment=ARCENAL_READONLY_SOCKET=/run/arcenal-readonly/query.sock
 ExecStart=__INSTALL_DIR__/.venv/bin/arcenal dashboard --host 127.0.0.1 --port __PORT__ --skip-build --no-open
 Restart=on-failure
 RestartSec=5
 
-# Cloisonnement du service qui peut exécuter des commandes locales.
-# Le helper sudo à liste blanche est nécessaire aux réparations confirmées.
-NoNewPrivileges=false
+# Les actions root appartiennent désormais au broker séparé.
+NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=__DATA_DIR__ __INSTALL_DIR__
+ReadWritePaths=__DATA_DIR__
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true

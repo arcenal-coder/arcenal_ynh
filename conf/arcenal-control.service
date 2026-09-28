@@ -1,0 +1,38 @@
+[Unit]
+Description=ARCenal — API de contrôle authentifiée
+After=network.target __APP___broker.service
+Requires=__APP___broker.service
+
+[Service]
+Type=simple
+User=__APP___control
+Group=__APP___control
+SupplementaryGroups=__APP___web
+WorkingDirectory=__INSTALL_DIR__/plugins/arcenal-supervisor
+Environment=HOME=/var/empty
+Environment=ARCENAL_AUDIT_DIR=/var/lib/__APP__-control
+Environment=ARCENAL_APPROVAL_DB=/run/arcenal-web/approvals.sqlite3
+Environment=ARCENAL_PRIVILEGED_SOCKET=/run/arcenal-control/privileged.sock
+Environment=ARCENAL_PRIMARY_ADMIN=__ADMIN__
+ExecStart=__INSTALL_DIR__/.venv/bin/python -m uvicorn control_api:app --uds /run/arcenal-web/http.sock
+ExecStartPost=/bin/chgrp __APP___web /run/arcenal-web/http.sock
+ExecStartPost=/bin/chmod 0660 /run/arcenal-web/http.sock
+Restart=on-failure
+RestartSec=5
+StateDirectory=__APP__-control
+StateDirectoryMode=0700
+RuntimeDirectory=__APP__-web
+RuntimeDirectoryMode=0751
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+ReadWritePaths=/run/__APP__-web /var/lib/__APP__-control
+
+[Install]
+WantedBy=multi-user.target

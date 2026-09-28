@@ -1,0 +1,141 @@
+#!/usr/bin/python3
+"""Broker root ARCenal à catalogue fermé et sans interpréteur shell."""
+
+from __future__ import annotations
+
+import grp
+import json
+import os
+import shutil
+import socketserver
+import subprocess
+import threading
+from pathlib import Path
+from typing import Final
+
+
+SERVICES: Final = frozenset({"arcenal", "nginx", "yunohost-api", "yunohost-portal-api", "slapd"})
+READ_ACTIONS: Final = {
+    "yunohost.version.read": ("/usr/bin/yunohost", "--version"),
+    "yunohost.apps.read": ("/usr/bin/yunohost", "app", "list", "--output-as", "json"),
+    "yunohost.services.read": ("/usr/bin/yunohost", "service", "status", "--output-as", "json"),
+}
+PRIVILEGED_ACTIONS: Final = {
+    "yunohost.diagnosis.refresh": ("/usr/bin/yunohost", "diagnosis", "run", "--force"),
+    "nginx.reload": ("/usr/local/sbin/arcenal-nginx-reload",),
+}
+
+
+class BrokerContractError(ValueError):
+    """Signale une requête qui n'appartient pas au contrat du broker."""
+
+
+def _service_command(target: object) -> tuple[str, ...]:
+    if not isinstance(target, str) or target not in SERVICES:
+        raise BrokerContractError("Service non autorisé.")
+    return ("/usr/bin/systemctl", "restart", target)
+
+
+def _command(payload: object, readonly: bool) -> tuple[str, ...]:
+    if not isinstance(payload, dict):
+        raise BrokerContractError("Le message doit être un objet JSON.")
+    if set(payload) - {"action_id", "target"}:
+        raise BrokerContractError("Le message contient un champ inconnu.")
+    action_id = payload.get("action_id")
+    if not isinstance(action_id, str):
+        raise BrokerContractError("L'identifiant d'action est requis.")
+    if action_id != "service.restart" and payload.get("target") is not None:
+        raise BrokerContractError("Cette action n'accepte aucune cible.")
+    if readonly:
+        if action_id not in READ_ACTIONS:
+            raise BrokerContractError("Action interdite sur le canal de lecture.")
+        return READ_ACTIONS[action_id]
+    if action_id == "service.restart":
+        return _service_command(payload.get("target"))
+    if action_id not in PRIVILEGED_ACTIONS:
+        raise BrokerContractError("Action privilégiée non autorisée.")
+    return PRIVILEGED_ACTIONS[action_id]
+
+
+def _invoke(command: tuple[str, ...]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(command, capture_output=True, text=True, timeout=120, check=False)
+
+
+def _response(result: subprocess.CompletedProcess[str]) -> dict[str, object]:
+    output = (result.stdout or result.stderr).strip()[:20_000]
+    return {"ok": result.returncode == 0, "code": result.returncode, "output": output}
+
+
+def _verify_restart(command: tuple[str, ...]) -> dict[str, object]:
+    status = _invoke(("/usr/bin/systemctl", "is-active", command[2]))
+    return _response(status)
+
+
+def _run(payload: object, readonly: bool) -> dict[str, object]:
+    command = _command(payload, readonly)
+    try:
+        result = _invoke(command)
+        if result.returncode == 0 and command[:2] == ("/usr/bin/systemctl", "restart"):
+            return _verify_restart(command)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {"ok": False, "error": str(exc)}
+    return _response(result)
+
+
+class RequestHandler(socketserver.StreamRequestHandler):
+    readonly = False
+
+    def _read(self) -> bytes:
+        self.connection.settimeout(5)
+        raw = self.rfile.readline(65_537)
+        if len(raw) > 65_536:
+            raise BrokerContractError("Requête trop volumineuse.")
+        return raw
+
+    def handle(self) -> None:
+        try:
+            response = _run(json.loads(self._read().decode("utf-8")), self.readonly)
+        except (BrokerContractError, OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            response = {"ok": False, "error": str(exc)}
+        self._write(response)
+
+    def _write(self, response: dict[str, object]) -> None:
+        self.wfile.write(json.dumps(response, ensure_ascii=False).encode("utf-8") + b"\n")
+
+
+class ReadonlyHandler(RequestHandler):
+    readonly = True
+
+
+def _prepare_directory(path: Path, group: str) -> None:
+    path.mkdir(parents=True, exist_ok=True, mode=0o750)
+    os.chown(path, 0, grp.getgrnam(group).gr_gid)
+    path.chmod(0o750)
+
+
+def _server(path: Path, group: str, handler: type[RequestHandler]) -> socketserver.UnixStreamServer:
+    _prepare_directory(path.parent, group)
+    path.unlink(missing_ok=True)
+    server = socketserver.UnixStreamServer(str(path), handler)
+    os.chown(path, 0, grp.getgrnam(group).gr_gid)
+    path.chmod(0o660)
+    return server
+
+
+def main() -> None:
+    control_group = os.environ.get("ARCENAL_CONTROL_GROUP", "arcenal_control")
+    agent_group = os.environ.get("ARCENAL_AGENT_GROUP", "arcenal")
+    privileged = _server(Path("/run/arcenal-control/privileged.sock"), control_group, RequestHandler)
+    readonly = _server(Path("/run/arcenal-readonly/query.sock"), agent_group, ReadonlyHandler)
+    thread = threading.Thread(target=readonly.serve_forever, daemon=True)
+    thread.start()
+    try:
+        privileged.serve_forever()
+    finally:
+        readonly.shutdown()
+        shutil.rmtree("/run/arcenal-readonly", ignore_errors=True)
+        shutil.rmtree("/run/arcenal-control", ignore_errors=True)
+
+
+if __name__ == "__main__":
+    main()
