@@ -45,3 +45,18 @@ arcenal_model_route_is_valid "gemini" "gemini-3.6-flash"
 arcenal_model_route_is_valid "openrouter" "openrouter/auto"
 ! arcenal_model_route_is_valid "gemini" "auto"
 ! arcenal_model_route_is_valid "gemini" ""
+
+printf 'model:\n  provider: gemini\n  default: auto\n' > "$config_file"
+repaired_model="$(arcenal_model_repair_gemini_auto "$config_file" "$current_owner" "$current_group")"
+test "$repaired_model" = "gemini-flash-latest"
+test "$(arcenal_model_get "$config_file" default)" = "gemini-flash-latest"
+
+printf 'model:\n  provider: gemini\n  default: gemini-3.6-flash\n' > "$config_file"
+unchanged="$(cksum "$config_file")"
+test -z "$(arcenal_model_repair_gemini_auto "$config_file" "$current_owner" "$current_group")"
+test "$(cksum "$config_file")" = "$unchanged"
+
+printf 'model:\n  provider: openai\n  default: auto\n' > "$config_file"
+unchanged="$(cksum "$config_file")"
+test -z "$(arcenal_model_repair_gemini_auto "$config_file" "$current_owner" "$current_group")"
+test "$(cksum "$config_file")" = "$unchanged"

@@ -19,6 +19,17 @@ arcenal_model_route_is_valid() {
     [ "$normalized" != "auto" ]
 }
 
+arcenal_model_repair_gemini_auto() {
+    local config_file="$1" owner="$2" group="$3"
+    local provider model normalized
+    provider="$(arcenal_model_get "$config_file" provider)"
+    model="$(arcenal_model_get "$config_file" default)"
+    normalized="$(printf '%s' "$model" | tr '[:upper:]' '[:lower:]')"
+    [ "$provider" = "gemini" ] && [ "$normalized" = "auto" ] || return 0
+    arcenal_model_set "$config_file" default "gemini-flash-latest" "$owner" "$group"
+    printf '%s\n' "gemini-flash-latest"
+}
+
 arcenal_model_set() {
     local config_file="$1" key="$2" value="$3" owner="$4" group="$5"
     local temporary_file

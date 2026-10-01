@@ -43,6 +43,13 @@ arcenal_build_interfaces "$web_base"
 # reste volontairement intact pendant les mises à niveau.
 arcenal_model_migrate_legacy "$config_file" "$app" "$app" || \
     ynh_die "La configuration historique du modèle est invalide."
+# Les versions antérieures acceptaient « auto » pour Gemini alors que cet
+# identifiant n'existe pas côté Google et bloquait toute nouvelle conversation.
+migrated_model="$(arcenal_model_repair_gemini_auto "$config_file" "$app" "$app")" || \
+    ynh_die "La configuration Gemini historique n'a pas pu être corrigée."
+if [ -n "$migrated_model" ]; then
+    ynh_print_warn "Le modèle Gemini historique « auto » a été remplacé par « $migrated_model »."
+fi
 arcenal_migrate_native_configuration
 
 #=================================================

@@ -10,6 +10,16 @@ assert_upgrade_repairs_dependencies() {
     grep -Fq 'source "$(dirname "$0")/_common.sh"' "$upgrade_script"
     grep -Fq 'ynh_setup_source --dest_dir="$install_dir" --full_replace' "$upgrade_script"
     grep -Fq 'arcenal_install_deps' "$upgrade_script"
+    if ! grep -Fq 'arcenal_model_repair_gemini_auto' "$upgrade_script"; then
+        printf 'La mise à niveau doit corriger la route Gemini historique.\n' >&2
+        return 1
+    fi
+    repair_line="$(grep -n 'arcenal_model_repair_gemini_auto' "$upgrade_script" | cut -d: -f1)"
+    native_line="$(grep -n '^arcenal_migrate_native_configuration$' "$upgrade_script" | cut -d: -f1)"
+    if [ "$repair_line" -ge "$native_line" ]; then
+        printf 'La route Gemini doit être corrigée avant la migration native.\n' >&2
+        return 1
+    fi
 
     if grep -Fq '"$install_dir/.local/bin/uv" sync' "$upgrade_script"; then
         printf 'La mise à niveau ne doit pas supposer que uv existe déjà.\n' >&2
