@@ -27,8 +27,15 @@ grep -Fq 'SupplementaryGroups=__APP__ __APP___control' "$(dirname "$0")/../conf/
 grep -Fq 'UMask=0077' "$(dirname "$0")/../conf/arcenal-control.service"
 grep -Fq 'StateDirectoryMode=0700' "$(dirname "$0")/../conf/arcenal-control.service"
 grep -Fq 'ARCENAL_APPROVAL_DB=/run/arcenal-web/approvals.sqlite3' "$(dirname "$0")/../conf/arcenal-control.service"
-grep -Fq 'ExecStartPost=/bin/chmod 0660 /run/__APP__-web/http.sock' \
+grep -Fq 'ExecStartPre=/bin/rm -f /run/__APP__-web/http.sock' \
     "$(dirname "$0")/../conf/arcenal-control.service"
+grep -Fq 'ExecStartPost=/usr/local/sbin/arcenal-control-socket-ready /run/__APP__-web/http.sock' \
+    "$(dirname "$0")/../conf/arcenal-control.service"
+grep -Fq 'RuntimeDirectoryMode=0750' "$(dirname "$0")/../conf/arcenal-control.service"
+grep -Fq 'arcenal-control-socket-ready /usr/local/sbin/arcenal-control-socket-ready' \
+    "$(dirname "$0")/../scripts/_common.sh"
+grep -Fq 'rm -f /usr/local/sbin/arcenal-control-socket-ready' \
+    "$(dirname "$0")/../scripts/remove"
 grep -Fq '/run/arcenal-web/http.sock' "$(dirname "$0")/../conf/nginx.conf"
 grep -Fq 'proxy_set_header Remote-User $http_ynh_user;' "$(dirname "$0")/../conf/nginx.conf"
 ! grep -Fq '$http_remote_user' "$(dirname "$0")/../conf/nginx.conf"

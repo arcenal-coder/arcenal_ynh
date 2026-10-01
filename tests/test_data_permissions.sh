@@ -13,8 +13,11 @@ grep -Fq -- "-name '*.db-wal'" "$common_script"
 grep -Fq 'UMask=0077' "$root_dir/conf/arcenal.service"
 grep -Fq 'UMask=0077' "$root_dir/conf/arcenal-control.service"
 grep -Fq 'UMask=0077' "$root_dir/conf/arcenal-broker.service"
-grep -Fq 'ExecStartPost=/bin/chmod 0660 /run/__APP__-web/http.sock' \
+grep -Fq 'ExecStartPre=/bin/rm -f /run/__APP__-web/http.sock' \
     "$root_dir/conf/arcenal-control.service"
+grep -Fq 'ExecStartPost=/usr/local/sbin/arcenal-control-socket-ready /run/__APP__-web/http.sock' \
+    "$root_dir/conf/arcenal-control.service"
+grep -Fq 'RuntimeDirectoryMode=0750' "$root_dir/conf/arcenal-control.service"
 grep -Fq 'Environment=ARCENAL_HOME=__DATA_DIR__' "$root_dir/conf/arcenal.service"
 grep -Fq 'arcenal_migrate_native_configuration' "$common_script"
 grep -Fq 'env -u ARCENAL_CONFIG_BACKEND' "$common_script"

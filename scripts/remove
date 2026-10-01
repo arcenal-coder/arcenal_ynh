@@ -21,3 +21,4 @@ rm -f "/etc/sudoers.d/$app-supervisor"
 rm -f /usr/local/sbin/arcenal-supervisor-helper
 rm -f /usr/local/sbin/arcenal-privileged-broker
 rm -f /usr/local/sbin/arcenal-nginx-reload
+rm -f /usr/local/sbin/arcenal-control-socket-ready

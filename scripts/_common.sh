@@ -93,6 +93,7 @@ arcenal_migrate_native_configuration() {
 arcenal_install_security_bridge() {
     install -o root -g root -m 0755 ../conf/arcenal-privileged-broker /usr/local/sbin/arcenal-privileged-broker
     install -o root -g root -m 0755 ../conf/arcenal-nginx-reload /usr/local/sbin/arcenal-nginx-reload
+    install -o root -g root -m 0755 ../conf/arcenal-control-socket-ready /usr/local/sbin/arcenal-control-socket-ready
     rm -f /usr/local/sbin/arcenal-supervisor-helper "/etc/sudoers.d/$app-supervisor"
     ynh_config_add_systemd --service="${app}_broker" --template="arcenal-broker.service"
     ynh_config_add_systemd --service="${app}_control" --template="arcenal-control.service"

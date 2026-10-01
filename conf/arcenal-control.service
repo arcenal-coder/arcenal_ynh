@@ -14,14 +14,15 @@ Environment=ARCENAL_AUDIT_DIR=/var/lib/__APP__-control
 Environment=ARCENAL_APPROVAL_DB=/run/arcenal-web/approvals.sqlite3
 Environment=ARCENAL_PRIVILEGED_SOCKET=/run/arcenal-control/privileged.sock
 Environment=ARCENAL_PRIMARY_ADMIN=__ADMIN__
+ExecStartPre=/bin/rm -f /run/__APP__-web/http.sock
 ExecStart=__INSTALL_DIR__/.venv/bin/python -m uvicorn control_api:app --uds /run/arcenal-web/http.sock
-ExecStartPost=/bin/chmod 0660 /run/__APP__-web/http.sock
+ExecStartPost=/usr/local/sbin/arcenal-control-socket-ready /run/__APP__-web/http.sock
 Restart=on-failure
 RestartSec=5
 StateDirectory=__APP__-control
 StateDirectoryMode=0700
 RuntimeDirectory=__APP__-web
-RuntimeDirectoryMode=0751
+RuntimeDirectoryMode=0750
 UMask=0077
 NoNewPrivileges=true
 PrivateTmp=true

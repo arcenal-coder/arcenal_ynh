@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -eu
+
+socket_path="${1:-}"
+max_attempts="${2:-100}"
+
+case "$max_attempts" in
+    ''|*[!0-9]*) exit 64 ;;
+esac
+
+test -n "$socket_path" && test "$max_attempts" -gt 0 || exit 64
+
+attempt=0
+while test "$attempt" -lt "$max_attempts"; do
+    if test -S "$socket_path"; then
+        chmod 0660 "$socket_path"
+        exit 0
+    fi
+    attempt=$((attempt + 1))
+    sleep 0.1
+done
+
+echo "Le socket de contrôle ARCenal n'a pas été créé à temps." >&2
+exit 1
