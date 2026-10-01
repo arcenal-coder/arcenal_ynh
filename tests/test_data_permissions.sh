@@ -5,6 +5,7 @@ set -eu
 root_dir="$(cd "$(dirname "$0")/.." && pwd)"
 common_script="$root_dir/scripts/_common.sh"
 
+grep -Fq 'install -d -o root -g "$app" -m 0750 "/var/www/$app"' "$common_script"
 grep -Fq 'install -d -o "$app" -g "$app" -m 0700 "$ARCENAL_DATA_DIR"' "$common_script"
 grep -Fq 'chmod 0600 "$ARCENAL_DATA_DIR/$sensitive_file"' "$common_script"
 grep -Fq 'install -d -o "$app" -g "$app" -m 0700 "$ARCENAL_DATA_DIR/arcenal"' "$common_script"
@@ -27,5 +28,6 @@ for script_name in config; do
 done
 
 for script_name in install upgrade restore; do
+    grep -Fq 'arcenal_secure_base_permissions' "$root_dir/scripts/$script_name"
     grep -Fq 'arcenal_migrate_native_configuration' "$root_dir/scripts/$script_name"
 done

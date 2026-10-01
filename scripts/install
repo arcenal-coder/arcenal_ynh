@@ -17,6 +17,7 @@ ynh_setup_source --dest_dir="$install_dir"
 # UTILISATEUR SYSTÈME ET PERMISSIONS
 #=================================================
 # Le moteur et l'API de contrôle utilisent des identités distinctes.
+arcenal_secure_base_permissions
 chown -R "$app:" "$install_dir"
 find "$install_dir" -type d -exec chmod 750 {} \;
 find "$install_dir" -type f -exec chmod 640 {} \;

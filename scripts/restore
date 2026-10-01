@@ -24,6 +24,7 @@ chown "$app:" "/var/www/$app/data/.arcenal-yunohost"
 
 # Réinstalle les sources et dépendances, puis régénère les configurations.
 ynh_setup_source --dest_dir="$install_dir" --full_replace
+arcenal_secure_base_permissions
 chown -R "$app:" "$install_dir"
 arcenal_install_control_user
 arcenal_prepare_control_state
@@ -33,6 +34,7 @@ arcenal_install_deps
 web_base="${path%/}/"
 arcenal_build_interfaces "$web_base"
 arcenal_migrate_native_configuration
+arcenal_secure_data_permissions
 
 ynh_config_add_nginx
 ynh_config_add_systemd --template="arcenal.service"

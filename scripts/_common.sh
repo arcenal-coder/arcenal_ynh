@@ -59,6 +59,10 @@ arcenal_prepare_control_state() {
     install -d -o "${app}_control" -g "${app}_control" -m 0700 "/var/lib/$app-control"
 }
 
+arcenal_secure_base_permissions() {
+    install -d -o root -g "$app" -m 0750 "/var/www/$app"
+}
+
 arcenal_secure_data_permissions() {
     local sensitive_file
     install -d -o "$app" -g "$app" -m 0700 "$ARCENAL_DATA_DIR"

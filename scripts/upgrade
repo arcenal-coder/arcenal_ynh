@@ -22,6 +22,7 @@ ynh_systemctl --service="${app}_broker" --action="stop" || true
 # RÉCUPÉRATION DES NOUVELLES SOURCES
 #=================================================
 ynh_setup_source --dest_dir="$install_dir" --full_replace
+arcenal_secure_base_permissions
 chown -R "$app:" "$install_dir"
 
 arcenal_install_control_user

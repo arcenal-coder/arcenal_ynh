@@ -14,7 +14,7 @@ Environment="PATH=__PATH_WITH_NODEJS__"
 Environment=ARCENAL_HOME=__DATA_DIR__
 Environment=HERMES_HOME=__DATA_DIR__
 Environment=ARCENAL_RELEASE=0.21.0-arcenal21
-Environment=ARCENAL_PACKAGE_VERSION=0.21.0~ynh37
+Environment=ARCENAL_PACKAGE_VERSION=0.21.0~ynh38
 Environment=ARCENAL_SOURCE_REVISION=09214e609e8c20e8f998f911166a82b23c322c76
 # Utilise le terminal préconstruit par le paquet, sans installation au premier chat.
 Environment=HERMES_TUI_DIR=__INSTALL_DIR__/ui-tui
