@@ -12,6 +12,13 @@ arcenal_model_get() {
     ' "$config_file"
 }
 
+arcenal_model_route_is_valid() {
+    local model="$2" normalized
+    [ -n "$1" ] && [ -n "$model" ] || return 1
+    normalized="$(printf '%s' "$model" | tr '[:upper:]' '[:lower:]')"
+    [ "$normalized" != "auto" ]
+}
+
 arcenal_model_set() {
     local config_file="$1" key="$2" value="$3" owner="$4" group="$5"
     local temporary_file

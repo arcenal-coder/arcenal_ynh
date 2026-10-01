@@ -40,3 +40,8 @@ if arcenal_model_migrate_legacy "$config_file" "$current_owner" "$current_group"
     echo "Une configuration historique incomplète aurait dû être rejetée." >&2
     exit 1
 fi
+
+arcenal_model_route_is_valid "gemini" "gemini-3.6-flash"
+arcenal_model_route_is_valid "openrouter" "openrouter/auto"
+! arcenal_model_route_is_valid "gemini" "auto"
+! arcenal_model_route_is_valid "gemini" ""

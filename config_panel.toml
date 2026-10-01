@@ -15,7 +15,7 @@ name.fr = "ARCenal Agent"
         ask.fr = "Fournisseur"
         type = "select"
         bind = "null"
-        choices = ["nous-portal", "openrouter", "openai", "anthropic", "custom"]
+        choices = ["nous-portal", "openrouter", "openai", "anthropic", "gemini", "custom"]
         default = "openrouter"
 
         [main.model_settings.model]

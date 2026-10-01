@@ -38,6 +38,10 @@ setter__model() {
 validate__model() {
     if [[ "$model" == *$'\n'* ]] || [ -z "$model" ]; then
         echo "Le nom du modèle doit tenir sur une seule ligne et ne peut pas être vide."
+        return
+    fi
+    if ! arcenal_model_route_is_valid "$provider" "$model"; then
+        echo "Choisissez un modèle précis : « auto » ne peut pas être envoyé directement à un fournisseur."
     fi
 }
 
