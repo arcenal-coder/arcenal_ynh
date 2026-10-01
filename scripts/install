@@ -67,6 +67,7 @@ if [ -n "$api_key" ]; then
     chmod 600 "$data_dir/.env"
 fi
 chown -R "$app:" "$data_dir"
+arcenal_migrate_native_configuration
 
 #=================================================
 # CONFIGURATION NGINX

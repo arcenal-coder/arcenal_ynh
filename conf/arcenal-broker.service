@@ -12,6 +12,7 @@ Environment=ARCENAL_AGENT_GROUP=__APP__
 ExecStart=/usr/local/sbin/arcenal-privileged-broker
 Restart=on-failure
 RestartSec=5
+UMask=0077
 RuntimeDirectory=__APP__-control __APP__-readonly
 RuntimeDirectoryMode=0750
 NoNewPrivileges=true

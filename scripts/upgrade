@@ -42,6 +42,7 @@ arcenal_build_interfaces "$web_base"
 # reste volontairement intact pendant les mises à niveau.
 arcenal_model_migrate_legacy "$config_file" "$app" "$app" || \
     ynh_die "La configuration historique du modèle est invalide."
+arcenal_migrate_native_configuration
 
 #=================================================
 # RÉAPPLICATION DES CONFIGURATIONS ET REDÉMARRAGE

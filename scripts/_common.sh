@@ -4,7 +4,7 @@
 # Les helpers du packaging v2 sont chargés automatiquement.
 
 readonly ARCENAL_INSTALL_DIR="/var/www/arcenal/app"
-readonly ARCENAL_DATA_DIR="/var/www/arcenal/data"     # HERMES_HOME (config.yaml, .env, skills, memory)
+readonly ARCENAL_DATA_DIR="/var/www/arcenal/data"     # ARCENAL_HOME ; compatibilité HERMES_HOME transitoire
 readonly ARCENAL_SERVICE_NAME="arcenal"
 
 # Retourne la version figée de l'archive source ARCenal Agent.
@@ -50,19 +50,44 @@ arcenal_build_interfaces() {
 
 arcenal_install_control_user() {
     local control_user="${app}_control"
-    local web_group="${app}_web"
     if ! ynh_system_user_exists --username="$control_user"; then
         ynh_system_user_create --username="$control_user" --groups="$app"
     fi
-    if ! ynh_system_group_exists --group="$web_group"; then
-        groupadd --system "$web_group"
-    fi
-    usermod -a -G "$web_group" "$control_user"
-    usermod -a -G "$web_group" www-data
 }
 
 arcenal_prepare_control_state() {
     install -d -o "${app}_control" -g "${app}_control" -m 0700 "/var/lib/$app-control"
+}
+
+arcenal_secure_data_permissions() {
+    local sensitive_file
+    install -d -o "$app" -g "$app" -m 0700 "$ARCENAL_DATA_DIR"
+    for sensitive_file in config.yaml .env .arcenal-yunohost; do
+        [ ! -f "$ARCENAL_DATA_DIR/$sensitive_file" ] || \
+            chown "$app:$app" "$ARCENAL_DATA_DIR/$sensitive_file"
+        [ ! -f "$ARCENAL_DATA_DIR/$sensitive_file" ] || \
+            chmod 0600 "$ARCENAL_DATA_DIR/$sensitive_file"
+    done
+    install -d -o "$app" -g "$app" -m 0700 "$ARCENAL_DATA_DIR/arcenal"
+    if [ -f "$ARCENAL_DATA_DIR/arcenal/config.json" ]; then
+        chown "$app:$app" "$ARCENAL_DATA_DIR/arcenal/config.json"
+        chmod 0600 "$ARCENAL_DATA_DIR/arcenal/config.json"
+    fi
+    find "$ARCENAL_DATA_DIR" -xdev -type f \
+        \( -name '*.db' -o -name '*.db-wal' -o -name '*.db-shm' -o -name '*.sqlite3' \) \
+        -exec chown "$app:$app" {} + -exec chmod 0600 {} +
+}
+
+arcenal_migrate_native_configuration() {
+    # L’ancien fichier reste intact ; la commande vérifie la copie native avant démarrage.
+    ynh_exec_as_app env -u ARCENAL_CONFIG_BACKEND \
+        ARCENAL_HOME="$ARCENAL_DATA_DIR" \
+        HERMES_HOME="$ARCENAL_DATA_DIR" \
+        "$ARCENAL_INSTALL_DIR/.venv/bin/python" \
+        "$ARCENAL_INSTALL_DIR/scripts/arcenal_config_migrate.py" \
+        "$ARCENAL_INSTALL_DIR" "$ARCENAL_DATA_DIR" || \
+        ynh_die "La migration de la configuration native ARC a échoué."
+    arcenal_secure_data_permissions
 }
 
 arcenal_install_security_bridge() {
@@ -105,4 +130,5 @@ EOF
         chmod 600 "$ARCENAL_DATA_DIR/.env"
         chown "$app:" "$ARCENAL_DATA_DIR/.env"
     fi
+    arcenal_secure_data_permissions
 }

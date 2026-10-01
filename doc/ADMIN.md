@@ -52,7 +52,20 @@ a separate concern; each platform (Telegram bot token, etc.) is configured in
 
 ## Security notes
 
-The agent executes arbitrary shell commands **as the `arcenal` system user** on
-your server. The unit is hardened (ProtectSystem=strict, NoNewPrivileges) but the
-execution capability is the product's core feature — restrict SSO access
-accordingly and consider a Docker terminal backend for stronger isolation.
+La surface YunoHost active uniquement le jeu d’outils `arcenal-admin`. Les
+opérations privilégiées passent par un broker à commandes structurées et
+allowlistées ; aucun shell root arbitraire n’est exposé. Le moteur principal
+s’exécute sous l’utilisateur non privilégié `arcenal` avec une unité systemd
+durcie. L’administration doit rester réservée au groupe YunoHost `admins`.
+
+## Désinstallation et données
+
+Une désinstallation standard retire les services, les exécutables et les
+comptes système appartenant à ARCenal Agent. YunoHost décide de conserver ou de
+purger `/var/www/arcenal/data` selon le choix explicite de l’administrateur.
+
+Ce dossier contient notamment les bases SQLite, Enterprise Memory, la LDA, le
+miroir Wiki, la configuration et les secrets fournisseurs. Le script de retrait
+ne supprime jamais directement ces données. Les archives créées par YunoHost
+restent gérées séparément par le système de sauvegarde et doivent être traitées
+comme confidentielles, car elles peuvent contenir les secrets applicatifs.

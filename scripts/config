@@ -6,6 +6,7 @@
 
 source /usr/share/yunohost/helpers
 ynh_abort_if_errors
+source "$(dirname "$0")/_common.sh"
 source "$(dirname "$0")/model_config.sh"
 
 data_dir="/var/www/$app/data"
@@ -18,6 +19,12 @@ getter__provider() {
 
 setter__provider() {
     arcenal_model_set "$config_file" provider "$provider" "$app" "$app"
+}
+
+validate__provider() {
+    if [[ ! "$provider" =~ ^[a-z0-9][a-z0-9-]{0,39}$ ]]; then
+        echo "L’identifiant du fournisseur est invalide."
+    fi
 }
 
 getter__model() {
@@ -34,6 +41,12 @@ validate__model() {
     fi
 }
 
+validate__api_key() {
+    if [[ "$api_key" == *$'\n'* ]] || [[ "$api_key" == *$'\r'* ]]; then
+        echo "La clé API doit tenir sur une seule ligne."
+    fi
+}
+
 getter__api_key() {
     # Une clé secrète n'est jamais renvoyée vers l'interface d'administration.
     echo '""'
@@ -41,11 +54,15 @@ getter__api_key() {
 
 setter__api_key() {
     if [ -n "$api_key" ]; then
-        local provider_env
+        local provider_env temporary
         provider_env="$(arcenal_model_get "$config_file" provider | tr '[:lower:]-' '[:upper:]_')"
-        printf '%s_API_KEY=%s\n' "$provider_env" "$api_key" > "$env_file"
-        chown "$app:$app" "$env_file"
-        chmod 600 "$env_file"
+        temporary="$(mktemp "$data_dir/.env.XXXXXX")"
+        if [ -f "$env_file" ]; then
+            grep -v "^${provider_env}_API_KEY=" "$env_file" > "$temporary" || true
+        fi
+        printf '%s_API_KEY=%s\n' "$provider_env" "$api_key" >> "$temporary"
+        install -o "$app" -g "$app" -m 0600 "$temporary" "$env_file"
+        rm -f "$temporary"
     fi
 }
 
@@ -61,7 +78,7 @@ setter__enabled() {
 
 ynh_app_config_apply() {
     _ynh_app_config_apply
-    chown -R "$app:$app" "$data_dir"
+    arcenal_secure_data_permissions
     ynh_systemctl --service="$app" --action="restart"
 }
 

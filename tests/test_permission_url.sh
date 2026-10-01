@@ -30,6 +30,10 @@ grep -Fq 'main.allowed = "admins"' "$root_dir/manifest.toml"
 grep -Fq 'wiki.url = "/wiki"' "$root_dir/manifest.toml"
 grep -Fq 'wiki.allowed = "all_users"' "$root_dir/manifest.toml"
 grep -Fq '"/api/plugins/arcenal-supervisor/knowledge/wiki/document"' "$root_dir/manifest.toml"
+grep -Fq 'sso = true' "$root_dir/manifest.toml"
+grep -Fq 'proxy_set_header Remote-User $http_ynh_user;' "$root_dir/conf/nginx.conf"
+grep -Fq 'proxy_set_header X-Remote-User "";' "$root_dir/conf/nginx.conf"
+grep -Fq 'proxy_set_header X-Auth-User "";' "$root_dir/conf/nginx.conf"
 
 if grep -Fq '[install.init_main_permission]' "$root_dir/manifest.toml"; then
     printf 'La permission principale ne doit pas être modifiable à l’installation.\n' >&2

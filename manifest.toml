@@ -22,8 +22,8 @@ yunohost = ">= 12.1.17" # Required by the current helpers 2.1 contract
 helpers_version = "2.1"
 architectures = ["amd64", "arm64"]
 multi_instance = false
-ldap = "not_relevant"
-sso = "not_relevant"
+ldap = false
+sso = true
 disk = "2G"
 ram.build = "1500M"
 ram.runtime = "1G"
