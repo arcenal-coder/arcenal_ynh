@@ -13,9 +13,9 @@ Environment="PATH=__PATH_WITH_NODEJS__"
 # Place le dossier personnel de l'agent dans les données persistantes.
 Environment=ARCENAL_HOME=__DATA_DIR__
 Environment=HERMES_HOME=__DATA_DIR__
-Environment=ARCENAL_RELEASE=0.21.0-arcenal32
-Environment=ARCENAL_PACKAGE_VERSION=0.21.0~ynh50
-Environment=ARCENAL_SOURCE_REVISION=a7ddd9759112b3b7efee41439b23c9358645595a
+Environment=ARCENAL_RELEASE=0.21.0-arcenal33
+Environment=ARCENAL_PACKAGE_VERSION=0.21.0~ynh51
+Environment=ARCENAL_SOURCE_REVISION=0aad8846160de88230f2017e184999e21c75b98a
 # Utilise le terminal préconstruit par le paquet, sans installation au premier chat.
 Environment=HERMES_TUI_DIR=__INSTALL_DIR__/ui-tui
 # ARCenal vérifie ce marqueur du paquet avant d'exécuter le code Hermes.
