@@ -7,69 +7,6 @@
 source /usr/share/yunohost/helpers
 ynh_abort_if_errors
 source "$(dirname "$0")/_common.sh"
-source "$(dirname "$0")/model_config.sh"
-
-data_dir="/var/www/$app/data"
-config_file="$data_dir/config.yaml"
-env_file="$data_dir/.env"
-
-getter__provider() {
-    arcenal_model_get "$config_file" provider
-}
-
-setter__provider() {
-    arcenal_model_set "$config_file" provider "$provider" "$app" "$app"
-}
-
-validate__provider() {
-    if [[ ! "$provider" =~ ^[a-z0-9][a-z0-9-]{0,39}$ ]]; then
-        echo "L’identifiant du fournisseur est invalide."
-    fi
-}
-
-getter__model() {
-    arcenal_model_get "$config_file" default
-}
-
-setter__model() {
-    arcenal_model_set "$config_file" default "$model" "$app" "$app"
-}
-
-validate__model() {
-    if [[ "$model" == *$'\n'* ]] || [ -z "$model" ]; then
-        echo "Le nom du modèle doit tenir sur une seule ligne et ne peut pas être vide."
-        return
-    fi
-    if ! arcenal_model_route_is_valid "$provider" "$model"; then
-        echo "Choisissez un modèle précis : « auto » ne peut pas être envoyé directement à un fournisseur."
-    fi
-}
-
-validate__api_key() {
-    if [[ "$api_key" == *$'\n'* ]] || [[ "$api_key" == *$'\r'* ]]; then
-        echo "La clé API doit tenir sur une seule ligne."
-    fi
-}
-
-getter__api_key() {
-    # Une clé secrète n'est jamais renvoyée vers l'interface d'administration.
-    echo '""'
-}
-
-setter__api_key() {
-    if [ -n "$api_key" ]; then
-        local provider_env temporary
-        provider_env="$(arcenal_model_get "$config_file" provider | tr '[:lower:]-' '[:upper:]_')"
-        temporary="$(mktemp "$data_dir/.env.XXXXXX")"
-        if [ -f "$env_file" ]; then
-            grep -v "^${provider_env}_API_KEY=" "$env_file" > "$temporary" || true
-        fi
-        printf '%s_API_KEY=%s\n' "$provider_env" "$api_key" >> "$temporary"
-        install -o "$app" -g "$app" -m 0600 "$temporary" "$env_file"
-        rm -f "$temporary"
-    fi
-}
-
 getter__enabled() {
     systemctl is-enabled --quiet "$app-gateway" 2>/dev/null && echo true || echo false
 }

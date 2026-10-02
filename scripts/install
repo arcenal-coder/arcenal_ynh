@@ -55,18 +55,9 @@ chmod 600 "$data_dir/.arcenal-yunohost"
 
 cat > "$data_dir/config.yaml" <<EOF
 # Géré par YunoHost (application arcenal).
-model:
-  provider: $provider
-  default: $model
 terminal:
   backend: local
 EOF
-
-if [ -n "$api_key" ]; then
-    provider_env="$(echo "$provider" | tr '[:lower:]-' '[:upper:]_')"
-    printf '%s_API_KEY=%s\n' "$provider_env" "$api_key" > "$data_dir/.env"
-    chmod 600 "$data_dir/.env"
-fi
 chown -R "$app:" "$data_dir"
 arcenal_migrate_native_configuration
 

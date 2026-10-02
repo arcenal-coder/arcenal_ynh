@@ -6,36 +6,6 @@ version = "1.0"
 name.en = "ARCenal Agent"
 name.fr = "ARCenal Agent"
 
-    [main.model_settings]
-    name.en = "Model provider"
-    name.fr = "Fournisseur de modèles"
-
-        [main.model_settings.provider]
-        ask.en = "Provider"
-        ask.fr = "Fournisseur"
-        type = "select"
-        bind = "null"
-        choices = ["nous-portal", "openrouter", "openai", "anthropic", "gemini", "custom"]
-        default = "openrouter"
-
-        [main.model_settings.model]
-        ask.en = "Default model"
-        ask.fr = "Modèle par défaut"
-        type = "string"
-        bind = "null"
-        default = "openrouter/auto"
-
-    [main.secrets]
-    name.en = "API keys"
-    name.fr = "Clés API"
-
-        [main.secrets.api_key]
-        ask.en = "Provider API key"
-        ask.fr = "Clé API du fournisseur"
-        type = "password"
-        bind = "null"
-        optional = true
-
     [main.gateway]
     name.en = "Messaging gateways (optional)"
     name.fr = "Passerelles de messagerie (optionnel)"

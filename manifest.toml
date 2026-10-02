@@ -39,26 +39,6 @@ ram.runtime = "1G"
     [install.admin]
     type = "user"
 
-    [install.provider]
-    ask.en = "Choose the default model provider"
-    ask.fr = "Choisissez le fournisseur de modèles par défaut"
-    type = "select"
-    choices = ["nous-portal", "openrouter", "openai", "anthropic", "gemini", "ollama", "custom"]
-    default = "openrouter"
-
-    [install.api_key]
-    ask.en = "API key for the chosen provider (can be left empty and set later in the config panel)"
-    ask.fr = "Clé API pour le fournisseur choisi (peut être laissée vide et définie plus tard dans le panneau de configuration)"
-    type = "string"
-    optional = true
-    default = ""
-
-    [install.model]
-    ask.en = "Default model (e.g. openrouter/auto)"
-    ask.fr = "Modèle par défaut (ex. openrouter/auto)"
-    type = "string"
-    default = "openrouter/auto"
-
 [resources]
     [resources.system_user]
     allow_ssh = false

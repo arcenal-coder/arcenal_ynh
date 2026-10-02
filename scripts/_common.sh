@@ -109,31 +109,16 @@ arcenal_start_security_bridge() {
 }
 
 arcenal_write_config() {
-    # $1 = provider, $2 = api key, $3 = model
-    local provider="$1"
-    local api_key="$2"
-    local model="$3"
-
     mkdir -p "$ARCENAL_DATA_DIR"
     chmod 700 "$ARCENAL_DATA_DIR"
 
-    # Non-interactive config, replacing `hermes setup`.
+    # Les fournisseurs et modèles appartiennent aux agents, pas au paquet.
     cat > "$ARCENAL_DATA_DIR/config.yaml" <<EOF
 # Managed by YunoHost (arcenal app). Manual edits may be overwritten
 # by the config panel; use `yunohost app config set arcenal` instead.
-model:
-  provider: $provider
-  default: $model
 terminal:
   backend: local
 EOF
     chown -R "$app:" "$ARCENAL_DATA_DIR"
-
-    if [ -n "$api_key" ]; then
-        printf '%s_API_KEY=%s\n' "$(echo "$provider" | tr '[:lower:]-' '[:upper:]_')" "$api_key" \
-            > "$ARCENAL_DATA_DIR/.env"
-        chmod 600 "$ARCENAL_DATA_DIR/.env"
-        chown "$app:" "$ARCENAL_DATA_DIR/.env"
-    fi
     arcenal_secure_data_permissions
 }
