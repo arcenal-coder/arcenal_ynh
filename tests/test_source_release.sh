@@ -6,13 +6,13 @@ root_dir="$(cd "$(dirname "$0")/.." && pwd)"
 manifest="$root_dir/manifest.toml"
 common="$root_dir/scripts/_common.sh"
 
-grep -Fq 'version = "0.21.0~ynh44"' "$manifest"
-grep -Fq 'v0.21.0-arcenal26.tar.gz' "$manifest"
-grep -Fq 'sha256 = "c97a2e9b9fa52a43c27647d54a696186e43731f62f743abe5adfcde55919d5f1"' "$manifest"
-grep -Fq 'echo "0.21.0-arcenal26"' "$common"
-grep -Fq 'Environment=ARCENAL_RELEASE=0.21.0-arcenal26' "$root_dir/conf/arcenal.service"
-grep -Fq 'Environment=ARCENAL_PACKAGE_VERSION=0.21.0~ynh44' "$root_dir/conf/arcenal.service"
-grep -Fq 'Environment=ARCENAL_SOURCE_REVISION=f396975074fad49cfc068781a6422b530ece5c00' \
+grep -Fq 'version = "0.21.0~ynh45"' "$manifest"
+grep -Fq 'v0.21.0-arcenal27.tar.gz' "$manifest"
+grep -Fq 'sha256 = "cd38de51db17798b71a3547cd9f4a6e2ecb75ab2b164c89d4303fb6bfe908440"' "$manifest"
+grep -Fq 'echo "0.21.0-arcenal27"' "$common"
+grep -Fq 'Environment=ARCENAL_RELEASE=0.21.0-arcenal27' "$root_dir/conf/arcenal.service"
+grep -Fq 'Environment=ARCENAL_PACKAGE_VERSION=0.21.0~ynh45' "$root_dir/conf/arcenal.service"
+grep -Fq 'Environment=ARCENAL_SOURCE_REVISION=d120a8d397ba6f990a6195488d46e0ee07b5b319' \
     "$root_dir/conf/arcenal.service"
 
 if grep -Eq 'v0\.21\.0-arcenal(19|20)\.tar\.gz' "$manifest"; then
