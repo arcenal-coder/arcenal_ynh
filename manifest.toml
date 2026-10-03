@@ -7,7 +7,7 @@ name = "ARCenal Agent"
 description."en" = "AI supervisor for ARCenal System, based on Hermes Agent by Nous Research"
 description."fr" = "Superviseur IA d’ARCenal Système, basé sur Hermes Agent de Nous Research"
 
-version = "0.21.0~ynh58"
+version = "0.21.0~ynh59"
 
 maintainers = ["compteonyx"]
 
@@ -81,5 +81,5 @@ ram.runtime = "1G"
 
     [resources.sources]
         [resources.sources.main]
-        url = "https://github.com/arcenal-coder/arcenal-agent/archive/refs/tags/v0.21.0-arcenal38.tar.gz"
-        sha256 = "6ddf3f9024b231b9feb9addde13ca04929e5e7c589e97df4e8ce2fce01cc2452"
+        url = "https://github.com/arcenal-coder/arcenal-agent/archive/refs/tags/v0.21.0-arcenal39.tar.gz"
+        sha256 = "41af111094e65de451984766ce57c298eb3265d88c52e2049ad72b3245b47608"
