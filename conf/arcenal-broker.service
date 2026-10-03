@@ -23,7 +23,8 @@ ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
 RestrictSUIDSGID=true
-ReadWritePaths=/run/__APP__-control /run/__APP__-readonly
+# YunoHost initialise toujours son journal CLI, y compris pour les lectures.
+ReadWritePaths=/run/__APP__-control /run/__APP__-readonly /var/log/yunohost
 
 [Install]
 WantedBy=multi-user.target

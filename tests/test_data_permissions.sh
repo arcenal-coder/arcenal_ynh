@@ -14,6 +14,8 @@ grep -Fq -- "-name '*.db-wal'" "$common_script"
 grep -Fq 'UMask=0077' "$root_dir/conf/arcenal.service"
 grep -Fq 'UMask=0077' "$root_dir/conf/arcenal-control.service"
 grep -Fq 'UMask=0077' "$root_dir/conf/arcenal-broker.service"
+grep -Fq 'ReadWritePaths=/run/__APP__-control /run/__APP__-readonly /var/log/yunohost' \
+  "$root_dir/conf/arcenal-broker.service"
 grep -Fq 'ExecStartPre=/bin/rm -f /run/__APP__-web/http.sock' \
     "$root_dir/conf/arcenal-control.service"
 grep -Fq 'ExecStartPost=/usr/local/sbin/arcenal-control-socket-ready /run/__APP__-web/http.sock' \
