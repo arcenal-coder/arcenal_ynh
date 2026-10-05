@@ -13,9 +13,9 @@ Environment="PATH=__PATH_WITH_NODEJS__"
 # Place le dossier personnel de l'agent dans les données persistantes.
 Environment=ARCENAL_HOME=__DATA_DIR__
 Environment=HERMES_HOME=__DATA_DIR__
-Environment=ARCENAL_RELEASE=0.21.0-arcenal41
-Environment=ARCENAL_PACKAGE_VERSION=0.21.0~ynh61
-Environment=ARCENAL_SOURCE_REVISION=668ca31afdb4fcf7dd9a05c392eabc1e526b905b
+Environment=ARCENAL_RELEASE=0.21.0-arcenal42
+Environment=ARCENAL_PACKAGE_VERSION=0.21.0~ynh62
+Environment=ARCENAL_SOURCE_REVISION=097af60144b99d5785fe45743de92614a19f378e
 # Le journal d'audit doit rester dans l'espace persistant autorisé par ProtectSystem.
 Environment=ARCENAL_AUDIT_DIR=__DATA_DIR__/arcenal/audit
 # Utilise le terminal préconstruit par le paquet, sans installation au premier chat.
