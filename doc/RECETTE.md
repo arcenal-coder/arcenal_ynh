@@ -1,6 +1,6 @@
 # Recette Hermes Agent pour YunoHost
 
-Candidate Preview : `0.21.0~ynh65`. Identifiant conservé : `arcenal`.
+Candidate Preview : `0.21.0~ynh66`. Identifiant conservé : `arcenal`.
 
 ## Source exacte
 
@@ -47,6 +47,11 @@ persistent ou si le contrôle échoue, sans lancer de commande de terminaison.
 La révision `~ynh64` a échoué à l'installation sur Python Bookworm ancien,
 qui ne connaît pas `TarFile.extractall(filter=...)`. `~ynh65` utilise dès
 l'amorçage le CPython épinglé par Hermes, fourni sous le code applicatif.
+
+`~ynh66` initialise Gratitude même si PM a déjà créé la configuration générique.
+La migration ne remplace pas un thème personnalisé ; un marqueur privé conserve
+ensuite tous les choix manuels de thème. Après upgrade, recharger complètement
+le navigateur puis ouvrir Sessions pour confirmer le parcours visible.
 
 ## Recette sur instance jetable
 

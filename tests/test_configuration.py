@@ -62,6 +62,26 @@ class ConfigurationTests(unittest.TestCase):
                 configuration.configure()
             self.assertEqual(config.read_text(), original)
 
+    def test_bootstrap_default_theme_is_initialized_to_gratitude(self):
+        from hermes_cli.config import cfg_get, load_config
+
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            (home / "config.yaml").write_text("dashboard:\n  theme: default\n")
+            with patch.dict(os.environ, {"HERMES_HOME": directory}):
+                configuration.configure()
+                self.assertEqual(cfg_get(load_config(), "dashboard", "theme"), "gratitude-system")
+
+    def test_manual_default_theme_after_initialization_is_preserved(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            with patch.dict(os.environ, {"HERMES_HOME": directory}):
+                configuration.configure()
+                original = "# Choix utilisateur après installation\ndashboard:\n  theme: default\n"
+                (home / "config.yaml").write_text(original)
+                configuration.configure()
+            self.assertEqual((home / "config.yaml").read_text(), original)
+
     def test_palettes_are_accepted_by_hermes(self):
         from hermes_cli.web_server_dashboard import _normalise_theme_definition
 

@@ -1,4 +1,4 @@
-# Rapport de contrôle — Hermes Agent `0.21.0~ynh65`
+# Rapport de contrôle — Hermes Agent `0.21.0~ynh66`
 
 ## Candidate
 
@@ -21,7 +21,7 @@
 | Environnement Python PM | RÉUSSI | Construction isolée avec dépendances verrouillées |
 | Dashboard web | RÉUSSI | TypeScript et build de la source Hermes |
 | TUI embarqué | RÉUSSI | Build amont nécessaire au chat |
-| Tests du paquet | RÉUSSI | 14 tests, dont choix du Python d'amorçage, pins, refus de fallback et quiescence |
+| Tests du paquet | RÉUSSI | 16 tests, dont thème préinitialisé par PM, conservation des choix futurs et quiescence |
 | Contraste AA des boutons principaux | RÉUSSI | Ratio texte/fond ≥ 4,5 pour les deux palettes |
 | Diff Git | RÉUSSI | Pas d'erreur de whitespace |
 | Revue indépendante | HISTORIQUE | Revue du socle ~ynh63 ; corrections ~ynh64/~ynh65 contrôlées localement |
@@ -45,6 +45,19 @@ catalogue des thèmes et le refus d'une API protégée sans jeton.
 | Promotion Stable | NON_EXÉCUTÉ | Recette client et autorisation séparée requises |
 
 ## Conclusion
+
+Diagnostic `~ynh65` après installation : service actif ; assets, profils,
+sessions et catalogue des thèmes accessibles. Les thèmes Gratitude sont présents
+mais le thème actif est `default`, car PM a déjà créé config.yaml avant le helper.
+`~ynh66` initialise Gratitude une seule fois lorsqu'aucun thème personnalisé n'est
+actif. Les choix suivants sont conservés, y compris un retour à Hermes Teal.
+Le test du fichier précréé reproduit le défaut sur `~ynh65` et passe après correction.
+
+La page Sessions rend ses statistiques dans un Chrome de diagnostic connecté
+au backend via SSH et un proxy reproduisant le sous-chemin. Cela ne reproduit
+pas la session SSO du navigateur client ; la zone vide de sa capture reste à
+confirmer après rechargement complet. Aucune modification du code Hermes ni
+des sessions utilisateur n'a été effectuée pour ce diagnostic.
 
 Recette `~ynh64` : ÉCHEC d'installation sur Bookworm, car le Python système
 ne supporte pas `TarFile.extractall(filter=...)`. `~ynh65` extrait d'abord,

@@ -76,10 +76,23 @@ def configure() -> None:
     install_themes(home)
     existing = (home / "config.yaml").exists()
     config = load_config()
-    if not existing:
+    initialized = home / ".yunohost-gratitude-initialized"
+    changed = False
+    # PM peut créer config.yaml avant ce helper. Son thème générique ne doit
+    # pas empêcher l'habillage demandé ; une migration unique préserve ensuite
+    # tous les choix de l'utilisateur, y compris un retour à Hermes Teal.
+    if not initialized.exists() and config.get("dashboard", {}).get("theme") in (None, "default"):
         config.setdefault("dashboard", {})["theme"] = "gratitude-system"
+        changed = True
+    if not existing:
         config.setdefault("terminal", {})["cwd"] = str(home)
+        changed = True
+    if changed:
         atomic_config_write(home / "config.yaml", config)
+    if not initialized.exists():
+        with initialized.open("x", encoding="utf-8") as stream:
+            stream.write("gratitude-initialized-v1\n")
+        initialized.chmod(0o600)
     (home / "config.yaml").chmod(0o600)
     for name in (".env", "auth.json"):
         secret_file = home / name

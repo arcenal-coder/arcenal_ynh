@@ -30,6 +30,8 @@ class DashboardSmokeTests(unittest.TestCase):
                        HERMES_RUNTIME_DIR=str(Path(directory) / "tools"),
                        HERMES_NODE=shutil.which("node") or "", PYTHONPATH=str(source))
             prepare = Path(__file__).parents[1] / "conf/configure.py"
+            # Reproduit le fichier générique déjà créé par l'amorçage PM.
+            (Path(directory) / "config.yaml").write_text("dashboard:\n  theme: default\n")
             subprocess.run([sys.executable, str(prepare)], env=env, check=True, stdout=logs, stderr=logs)
             command = ("from hermes_cli.web_server import start_server; "
                        f"start_server(port={port}, open_browser=False, isolated=True)")
