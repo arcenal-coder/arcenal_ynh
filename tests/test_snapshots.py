@@ -34,7 +34,7 @@ ynh_permission_url() { return 0; }
 ynh_permission_update() { printf '%s\n' "$*" >> "$EVENTS"; }
 ynh_die() { printf '%s\n' "$*" >&2; exit 1; }
 yunohost() { printf '%s\n' '{"allowed":["admins","all_users"]}'; }
-pgrep() {
+process_check_fixture() {
     case "$WRITER" in
         active) return 0 ;;
         error) return 2 ;;
@@ -47,6 +47,9 @@ pgrep() {
             ;;
         *) return 1 ;;
     esac
+}
+python3() {
+    if [[ "$1" == */process_check.py ]]; then process_check_fixture; else command python3 "$@"; fi
 }
 sleep() { return 0; }
 ps() { return 0; }

@@ -7,7 +7,7 @@ name = "Hermes Agent"
 description."en" = "Self-hosted Hermes assistant with its official dashboard and Gratitude theme"
 description."fr" = "Assistant Hermes auto-hébergé avec son dashboard officiel et le thème Gratitude"
 
-version = "0.21.0~ynh66"
+version = "0.21.0~ynh67"
 
 maintainers = ["compteonyx"]
 

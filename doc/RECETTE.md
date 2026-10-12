@@ -1,6 +1,6 @@
 # Recette Hermes Agent pour YunoHost
 
-Candidate Preview : `0.21.0~ynh66`. Identifiant conservé : `arcenal`.
+Candidate Preview : `0.21.0~ynh67`. Identifiant conservé : `arcenal`.
 
 ## Source exacte
 
@@ -52,6 +52,22 @@ l'amorçage le CPython épinglé par Hermes, fourni sous le code applicatif.
 La migration ne remplace pas un thème personnalisé ; un marqueur privé conserve
 ensuite tous les choix manuels de thème. Après upgrade, recharger complètement
 le navigateur puis ouvrir Sessions pour confirmer le parcours visible.
+
+## Déblocage des versions déjà installées
+
+Si la sauvegarde refuse uniquement un manager `systemd` utilisateur et son
+auxiliaire `(sd-pam)`, `~ynh67` corrige le filtre. La publication seule ne suffit
+pas : la sauvegarde préalable exécute encore `_common.sh` du paquet installé.
+
+Le réparateur `scripts/repair_process_check.py` nécessite une authentification
+administrateur. Il accepte seulement les empreintes connues, vérifie celles du
+correctif publié, sauvegarde l'original et change uniquement le filtre avec son
+helper. Il ne modifie aucune donnée ni configuration Hermes, ne redémarre aucun
+service et ne lance pas d'upgrade. Son exécution requiert l'autorisation du client.
+
+Le rollback consiste à rétablir le fichier `_common.sh.before-process-fix-*`
+créé avant réparation. Si le script installé est personnalisé, le réparateur
+refuse de le remplacer ; diagnostiquer l'écart avant toute autre action.
 
 ## Recette sur instance jetable
 

@@ -1,4 +1,4 @@
-# Rapport de contrôle — Hermes Agent `0.21.0~ynh66`
+# Rapport de contrôle — Hermes Agent `0.21.0~ynh67`
 
 ## Candidate
 
@@ -21,7 +21,7 @@
 | Environnement Python PM | RÉUSSI | Construction isolée avec dépendances verrouillées |
 | Dashboard web | RÉUSSI | TypeScript et build de la source Hermes |
 | TUI embarqué | RÉUSSI | Build amont nécessaire au chat |
-| Tests du paquet | RÉUSSI | 16 tests, dont thème préinitialisé par PM, conservation des choix futurs et quiescence |
+| Tests du paquet | RÉUSSI | 24 tests, dont identité des managers système et réparation ciblée |
 | Contraste AA des boutons principaux | RÉUSSI | Ratio texte/fond ≥ 4,5 pour les deux palettes |
 | Diff Git | RÉUSSI | Pas d'erreur de whitespace |
 | Revue indépendante | HISTORIQUE | Revue du socle ~ynh63 ; corrections ~ynh64/~ynh65 contrôlées localement |
@@ -45,6 +45,20 @@ catalogue des thèmes et le refus d'une API protégée sans jeton.
 | Promotion Stable | NON_EXÉCUTÉ | Recette client et autorisation séparée requises |
 
 ## Conclusion
+
+Échec de sauvegarde avant upgrade : le journal Root montre uniquement `systemd`
+et son enfant `(sd-pam)` sous l'utilisateur applicatif. L'attente ne résout pas
+ce faux positif. `~ynh67` ignore ces managers seulement si leur exécutable est
+le binaire système attendu et leur filiation est valide. Les processus inconnus,
+les imposteurs et les contrôles illisibles restent bloquants.
+
+Le backup préalable utilise les scripts du paquet installé : le nouveau paquet
+ne répare pas rétroactivement ce script. `scripts/repair_process_check.py` prépare
+une réparation administrateur bornée, avec empreintes des révisions connues,
+conservation du fichier original, contrôle du correctif téléchargé et remplacement
+de la seule fonction. Aucune réparation distante n'a encore été exécutée.
+Revue indépendante ciblée : aucun constat significatif dans le filtre/réparateur ;
+huit tests ciblés revérifiés. Le retour arrière de la réparation est manuel.
 
 Diagnostic `~ynh65` après installation : service actif ; assets, profils,
 sessions et catalogue des thèmes accessibles. Les thèmes Gratitude sont présents

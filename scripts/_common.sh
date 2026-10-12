@@ -30,7 +30,7 @@ hermes_build() {
     ynh_exec_as_app "$bootstrap" "$install_dir/scripts/write_install_stamp.py" \
         --output "$install_dir/install-stamp.json" --update-mechanism external \
         --commit 0aa764feddf00aed631019763ef777d38faf4335 --source yunohost \
-        --display-version "0.21.0~ynh66"
+        --display-version "0.21.0~ynh67"
     chown -R "root:$app" "$install_dir"
     chmod -R u=rwX,g=rX,o= "$install_dir"
 }
@@ -62,9 +62,10 @@ hermes_quiescent_data() {
     # Les enfants détachés peuvent terminer après systemctl stop. Attendre
     # leur sortie avant de refuser, sans tuer de processus utilisateur.
     local attempt status
+    local checker="$(dirname "${BASH_SOURCE[0]}")/process_check.py"
     for attempt in {0..30}; do
         status=0
-        pgrep -u "$app" >/dev/null || status=$?
+        python3 "$checker" "$app" >/dev/null || status=$?
         case "$status" in
             1) return 0 ;;
             0) [ "$attempt" -eq 30 ] || sleep 1 ;;
@@ -72,8 +73,8 @@ hermes_quiescent_data() {
         esac
     done
     # Les noms et PID suffisent au diagnostic ; aucun argument potentiellement secret.
-    ps -u "$app" -o pid,ppid,stat,comm >&2
-    ynh_die "Des processus de $app persistent après 30 secondes. Arrêtez les gateways actifs avant de réessayer."
+    python3 "$checker" "$app" >&2 || true
+    ynh_die "Des processus applicatifs de $app persistent après 30 secondes. Arrêtez les gateways actifs avant de réessayer."
 }
 
 hermes_retire_privileges() {
