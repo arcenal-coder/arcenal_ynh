@@ -1,8 +1,24 @@
 #!/bin/bash
 
-# Sauvegarde d'ARCenal Agent avec le packaging YunoHost v2.
-
+source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
-
-# Les sources sont retéléchargeables ; seules les données persistantes comptent.
-ynh_backup "/var/www/$app/data"
+set -e
+was_running=false
+if systemctl is-active --quiet "$app.service"; then
+    was_running=true
+    ynh_systemctl --service="$app" --action=stop
+fi
+trap 'if $was_running; then ynh_systemctl --service="$app" --action=start; fi' EXIT
+hermes_quiescent_data
+# ynh_backup déclare une copie ultérieure : embarquer un instantané figé
+# avant de redémarrer évite de copier une base SQLite et son WAL à des dates différentes.
+snapshot=$(mktemp "$install_dir/.ynh-data-snapshot.XXXXXX")
+tar --create --file="$snapshot" --directory="$data_dir" .
+chmod 600 "$snapshot"
+mv "$snapshot" "$install_dir/.ynh-data-snapshot.tar"
+# Le rollback doit retrouver le code et l'environnement Python précédents,
+# sans téléchargement ni reconstruction pendant la restauration.
+ynh_backup "$install_dir"
+# Les données sont déjà embarquées, figées, dans l'instantané du code.
+ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
+ynh_backup "/etc/systemd/system/$app.service"

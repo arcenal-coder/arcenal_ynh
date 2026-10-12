@@ -1,44 +1,40 @@
-# Administration — ARCenal Agent (YunoHost)
+# Administration — Hermes Agent sur YunoHost
 
 ## Architecture
 
-- **App dir**: `/var/www/arcenal/app` — sources, venv (uv, Python 3.11), built web UI
-- **Data dir**: `/var/www/arcenal/data` (`HERMES_HOME`) — `config.yaml`, `.env`, skills, memory, logs
-- **Service**: `systemctl status arcenal` — runs `arcenal serve` (FastAPI web UI) on 127.0.0.1:9119
-- **Reverse proxy**: nginx, exposed at the domain/path chosen at install; protected by YunoHost SSO (`init_main_permission`)
+- Identifiant de l'application : `arcenal`, conservé pour l'upgrade en place.
+- Code : `/var/www/arcenal/app`, propriété de root ; environnement Python et
+  outils de base construits par le gestionnaire PM officiel Hermes.
+- Données : `/var/www/arcenal/data` (`HERMES_HOME`), accessibles à l'utilisateur
+  système `arcenal`, sans SSH, SFTP ni droits root.
+- Service : `arcenal.service`, exécutant `hermes dashboard` sur boucle locale,
+  avec le port alloué par YunoHost et le TUI construit pour le chat.
+- Proxy : Nginx et SSOwat ; permission principale initialisée pour `admins`,
+  normalisée à l'installation, à l'upgrade et à la restauration.
 
-## Routine
+## Utilisation
 
-```bash
-yunohost app config set arcenal -a "main.model.model=anthropic/claude-sonnet-4"
-tail -f /var/log/arcenal/arcenal.log          # or journalctl -u arcenal -f
-yunohost app upgrade arcenal
-yunohost app backup arcenal
-```
+Ouvrir la tuile Hermes Agent depuis le portail YunoHost avec un administrateur.
+Configurer les fournisseurs, modèles et secrets dans le dashboard Hermes.
+Le panneau YunoHost indique ce parcours et ne réécrit pas la configuration.
 
-CLI on the server (as the app user):
+Le sélecteur de thèmes Hermes propose Gratitude Clair, Sombre et Système.
+Les choix sont enregistrés par Hermes ; le mode Système suit la préférence du
+navigateur via `prefers-color-scheme`.
 
-```bash
-sudo -u arcenal HERMES_HOME=/var/www/arcenal/data \
-  /var/www/arcenal/app/.venv/bin/arcenal doctor
-```
+## Exploitation
 
-## Updates
+Les journaux sont dans `HERMES_HOME/logs` et dans le journal systemd du service.
+Le fichier `install-stamp.json` désigne YunoHost comme propriétaire externe des
+mises à jour : utiliser le cycle du paquet, pas `hermes update`.
 
-The upstream `hermes update` / `arcenal update` mechanism is **bypassed**: upgrades
-are driven by YunoHost's `upgrade` script, which re-downloads a pinned source
-archive. Never run `arcenal update` on the server — the install is not a git
-checkout and the command will refuse or fail harmlessly.
+Les gateways configurés dans Hermes restent des processus distincts du
+dashboard. Ils doivent être arrêtés avant une sauvegarde si le paquet détecte
+des écritures encore actives ; le paquet refuse une sauvegarde incohérente.
 
-## Gateways (Telegram, Discord, ...)
+Les données ARC héritées sont conservées mais ne sont pas exposées par une
+façade parallèle. Aucun helper sudo de supervision ARC n'est installé.
 
-The web UI is the primary surface. Messaging gateways (`arcenal gateway`) run as
-a separate concern; each platform (Telegram bot token, etc.) is configured in
-`/var/www/arcenal/data/config.yaml`. A dedicated systemd unit can be added later.
-
-## Security notes
-
-The agent executes arbitrary shell commands **as the `arcenal` system user** on
-your server. The unit is hardened (ProtectSystem=strict, NoNewPrivileges) but the
-execution capability is the product's core feature — restrict SSO access
-accordingly and consider a Docker terminal backend for stronger isolation.
+Voir `RECETTE.md` pour le premier upgrade, les sauvegardes de transition et les
+conditions de retour arrière ; `TEST_REPORT.md` distingue les preuves locales
+de la qualification YunoHost restant à effectuer.

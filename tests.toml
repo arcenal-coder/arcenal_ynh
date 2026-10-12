@@ -1,0 +1,9 @@
+test_format = 1.0
+
+[default]
+    args.path = "/arcenal"
+    test_upgrade_from.ynh21.name = "Version ARC avec superviseur"
+    test_upgrade_from.ynh21.url = "https://github.com/arcenal-coder/arcenal_ynh/tree/f79754bd4ddddacfdbc2aa1e74e70ebde717e124"
+
+[root]
+    args.path = "/"

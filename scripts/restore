@@ -1,35 +1,33 @@
 #!/bin/bash
 
-# Restauration d'ARCenal Agent avec le packaging YunoHost v2.
-
+source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
-
-ynh_restore_file --origin_path="/var/www/$app/data"
-
-# Les sauvegardes antérieures au garde YunoHost ne contiennent pas ce marqueur.
-printf '%s\n' 'managed-by-yunohost' > "/var/www/$app/data/.arcenal-yunohost"
-chmod 600 "/var/www/$app/data/.arcenal-yunohost"
-chown "$app:" "/var/www/$app/data/.arcenal-yunohost"
-
-# Réinstalle les sources et dépendances, puis régénère les configurations.
-ynh_setup_source --dest_dir="$install_dir"
-chown -R "$app:" "$install_dir"
-install -o root -g root -m 0755 ../conf/arcenal-supervisor-helper /usr/local/sbin/arcenal-supervisor-helper
-sed "s/__APP__/$app/g" ../conf/arcenal-supervisor-sudoers > "/etc/sudoers.d/$app-supervisor"
-chmod 0440 "/etc/sudoers.d/$app-supervisor"
-visudo -cf "/etc/sudoers.d/$app-supervisor"
-ynh_exec_as_app env \
-    HOME="$install_dir" \
-    UV_PYTHON_INSTALL_DIR="$install_dir/.uv/python" \
-    "$install_dir/.local/bin/uv" sync \
-        --directory "$install_dir" --python 3.11 --no-dev
-
-ynh_exec_as_app env HOME="$install_dir" \
-    npm --prefix "$install_dir" ci --workspace web
-web_base="${path%/}/"
-ynh_exec_as_app env HOME="$install_dir" \
-    npm --prefix "$install_dir" run build --workspace web -- --base="$web_base"
-
-ynh_config_add_nginx
-ynh_config_add_systemd --template="arcenal.service"
-ynh_systemctl --service="$app" --action="start"
+ynh_abort_if_errors
+ynh_restore "$install_dir"
+# L'instantané cohérent prime sur la copie tardive du dossier vivant.
+if [ -f "$install_dir/.ynh-data-snapshot.tar" ]; then
+    restored=$(mktemp -d "${data_dir}.restore.XXXXXX")
+    tar --extract --file="$install_dir/.ynh-data-snapshot.tar" --directory="$restored"
+    if [ -d "$data_dir" ]; then
+        previous=$(mktemp -d "${data_dir}.before-restore.XXXXXX")
+        mv "$data_dir" "$previous/data"
+    fi
+    mv "$restored" "$data_dir"
+else
+    ynh_die "La sauvegarde ne contient pas d'instantané cohérent des données Hermes."
+fi
+chown -R "root:$app" "$install_dir"
+chown -R "$app:$app" "$data_dir"
+chmod 700 "$data_dir"
+ynh_restore "/etc/nginx/conf.d/$domain.d/$app.conf"
+ynh_restore "/etc/systemd/system/$app.service"
+nodejs_version=$(ynh_app_setting_get --key=nodejs_version)
+hermes_node="/opt/node_n/n/versions/node/$nodejs_version/bin/node"
+test -x "$hermes_node" || ynh_die "Le runtime Node YunoHost restauré est absent."
+ynh_app_setting_set --key=hermes_node --value="$hermes_node"
+ynh_config_add_systemd --template=arcenal.service
+hermes_admin_permission
+systemctl enable "$app.service" --quiet
+yunohost service add "$app" --description="Hermes Agent" --log="$data_dir/logs/gui.log"
+hermes_start
+ynh_systemctl --service=nginx --action=reload

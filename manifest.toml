@@ -3,27 +3,26 @@
 packaging_format = 2
 
 id = "arcenal"
-name = "ARCenal Agent"
-description."en" = "AI supervisor for ARCenal System, based on Hermes Agent by Nous Research"
-description."fr" = "Superviseur IA d’ARCenal Système, basé sur Hermes Agent de Nous Research"
+name = "Hermes Agent"
+description."en" = "Self-hosted Hermes assistant with its official dashboard and Gratitude theme"
+description."fr" = "Assistant Hermes auto-hébergé avec son dashboard officiel et le thème Gratitude"
 
-version = "0.21.0~ynh21"
+version = "0.21.0~ynh63"
 
 maintainers = ["compteonyx"]
 
 [upstream]
 license = "MIT"
-website = "https://github.com/arcenal-coder/arcenal-agent"
-code = "https://github.com/arcenal-coder/arcenal-agent"
-cpe = "???" # not applicable — not a packaged CPE software
+website = "https://hermes-agent.nousresearch.com"
+code = "https://github.com/NousResearch/hermes-agent"
 
 [integration]
 yunohost = ">= 12.1.17" # Required by the current helpers 2.1 contract
 helpers_version = "2.1"
 architectures = ["amd64", "arm64"]
 multi_instance = false
-ldap = "not_relevant"
-sso = "not_relevant"
+ldap = false
+sso = true
 disk = "2G"
 ram.build = "1500M"
 ram.runtime = "1G"
@@ -35,33 +34,6 @@ ram.runtime = "1G"
     [install.path]
     type = "path"
     default = "/arcenal"
-
-    [install.admin]
-    type = "user"
-
-    [install.init_main_permission]
-    type = "group"
-    default = "admins"
-
-    [install.provider]
-    ask.en = "Choose the default model provider"
-    ask.fr = "Choisissez le fournisseur de modèles par défaut"
-    type = "select"
-    choices = ["nous-portal", "openrouter", "openai", "anthropic", "custom"]
-    default = "openrouter"
-
-    [install.api_key]
-    ask.en = "API key for the chosen provider (can be left empty and set later in the config panel)"
-    ask.fr = "Clé API pour le fournisseur choisi (peut être laissée vide et définie plus tard dans le panneau de configuration)"
-    type = "string"
-    optional = true
-    default = ""
-
-    [install.model]
-    ask.en = "Default model (e.g. openrouter/auto)"
-    ask.fr = "Modèle par défaut (ex. openrouter/auto)"
-    type = "string"
-    default = "openrouter/auto"
 
 [resources]
     [resources.system_user]
@@ -79,8 +51,9 @@ ram.runtime = "1G"
 
     [resources.permissions]
     main.url = "/"
+    main.allowed = "admins"
     main.auth_header = true
-    main.protected = false
+    main.protected = true
 
     [resources.ports]
     main.default = 9119
@@ -89,9 +62,10 @@ ram.runtime = "1G"
     packages = ["python3", "python3-venv", "ripgrep", "ffmpeg", "git", "curl", "ca-certificates"]
 
     [resources.nodejs]
-    version = "22.22"
+    version = "22.23.1"
 
     [resources.sources]
         [resources.sources.main]
-        url = "https://github.com/arcenal-coder/arcenal-agent/archive/refs/tags/v0.21.0-arcenal9.tar.gz"
-        sha256 = "5cffa045c446e30b98e6d3a33c905218a234dd079e38de0655230c47f98d824b"
+        url = "https://codeload.github.com/NousResearch/hermes-agent/tar.gz/0aa764feddf00aed631019763ef777d38faf4335"
+        format = "tar.gz"
+        sha256 = "272c31c21e859394f512aa41bb20a1fa8ca45988fcb12fd3bdc971e3f5990cf8"

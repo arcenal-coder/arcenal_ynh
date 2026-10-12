@@ -1,14 +1,17 @@
 #!/bin/bash
 
-# Suppression d'ARCenal Agent — packaging YunoHost v2.
-
+source _common.sh
 source /usr/share/yunohost/helpers
+hermes_stop_legacy_services
 
 # Arrête et désenregistre le service lorsqu'il a été créé. Les ressources v2
 # se chargent ensuite de supprimer le code et, avec --purge, les données.
 if systemctl list-unit-files "$app.service" --no-legend 2>/dev/null | grep -q "$app.service"; then
     ynh_systemctl --service="$app" --action="stop"
 fi
-yunohost service remove "$app" || true
-rm -f "/etc/sudoers.d/$app-supervisor"
-rm -f /usr/local/sbin/arcenal-supervisor-helper
+if ynh_hide_warnings yunohost service status "$app" >/dev/null; then
+    yunohost service remove "$app"
+fi
+ynh_config_remove_systemd
+ynh_config_remove_nginx
+hermes_retire_privileges

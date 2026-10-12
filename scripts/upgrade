@@ -1,51 +1,28 @@
 #!/bin/bash
 
-# Mise à niveau d'ARCenal Agent avec le packaging YunoHost v2.
-# Les versions sont gérées par YunoHost afin de conserver une base Hermes
-# commune et facilement actualisable.
-
+source _common.sh
 source /usr/share/yunohost/helpers
-
-#=================================================
-# ARRÊT DU SERVICE
-#=================================================
+ynh_abort_if_errors
 ynh_systemctl --service="$app" --action="stop"
-
-#=================================================
-# RÉCUPÉRATION DES NOUVELLES SOURCES
-#=================================================
-ynh_setup_source --dest_dir="$install_dir"
-chown -R "$app:" "$install_dir"
-
-# Réinstalle le helper et sa règle à chaque mise à niveau du paquet.
-install -o root -g root -m 0755 ../conf/arcenal-supervisor-helper /usr/local/sbin/arcenal-supervisor-helper
-sed "s/__APP__/$app/g" ../conf/arcenal-supervisor-sudoers > "/etc/sudoers.d/$app-supervisor"
-chmod 0440 "/etc/sudoers.d/$app-supervisor"
-visudo -cf "/etc/sudoers.d/$app-supervisor"
-
-#=================================================
-# MISE À JOUR DES DÉPENDANCES
-#=================================================
-ynh_exec_as_app env \
-    HOME="$install_dir" \
-    UV_PYTHON_INSTALL_DIR="$install_dir/.uv/python" \
-    "$install_dir/.local/bin/uv" sync \
-        --directory "$install_dir" --python 3.11 --no-dev || \
-    ynh_die "Failed to sync Python dependencies — check $install_dir/.local/bin/uv"
-
-ynh_exec_as_app env HOME="$install_dir" \
-    npm --prefix "$install_dir" ci --workspace web
-web_base="${path%/}/"
-ynh_exec_as_app env HOME="$install_dir" \
-    npm --prefix "$install_dir" run build --workspace web -- --base="$web_base"
-
-# Le dossier de données (configuration, secrets, compétences et mémoire)
-# reste volontairement intact pendant les mises à niveau.
-
-#=================================================
-# RÉAPPLICATION DES CONFIGURATIONS ET REDÉMARRAGE
-#=================================================
-ynh_config_add_nginx
-ynh_permission_url --permission="main" --url="$domain$path" --auth_header=true
-ynh_config_add_systemd --template="arcenal.service"
-ynh_systemctl --service="$app" --action="restart"
+hermes_stop_legacy_services
+hermes_quiescent_data
+# Le premier paquet ARC n'archivait pas le code. Conserver une copie complète
+# de la transition en dehors du répertoire remplacé, sans publier de secret.
+transition_dir="/var/cache/yunohost/appconfbackup/$app-native-transition"
+install -d -o root -g root -m 0700 "$transition_dir"
+transition=$(mktemp "$transition_dir/snapshot.XXXXXX")
+tar --create --file="$transition" "$install_dir" "$data_dir" \
+    "/etc/nginx/conf.d/$domain.d/$app.conf" "/etc/systemd/system/$app.service"
+chmod 600 "$transition"
+for artifact in "/etc/sudoers.d/$app-supervisor" /usr/local/sbin/arcenal-supervisor-helper \
+    /usr/local/sbin/arcenal-privileged-broker /usr/local/sbin/arcenal-nginx-reload \
+    /usr/local/sbin/arcenal-control-socket-ready "/etc/systemd/system/${app}_control.service" \
+    "/etc/systemd/system/${app}_broker.service" "/var/lib/$app-control"; do
+    if [ -e "$artifact" ]; then
+        tar --append --file="$transition" "$artifact"
+    fi
+done
+hermes_build
+hermes_configure
+hermes_retire_privileges
+hermes_start
