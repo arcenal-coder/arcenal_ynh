@@ -1,6 +1,6 @@
 # Recette Hermes Agent pour YunoHost
 
-Candidate Preview : `0.21.0~ynh67`. Identifiant conservé : `arcenal`.
+Candidate Preview : `0.21.0~ynh68`. Identifiant conservé : `arcenal`.
 
 ## Source exacte
 
@@ -54,6 +54,10 @@ ensuite tous les choix manuels de thème. Après upgrade, recharger complètemen
 le navigateur puis ouvrir Sessions pour confirmer le parcours visible.
 
 ## Déblocage des versions déjà installées
+
+`~ynh68` sélectionne le TUI précompilé au clic Chat. Après upgrade, recharger
+complètement le navigateur puis ouvrir Chat et vérifier que le terminal affiche
+son écran initial, avant d'envoyer un message ou de choisir un fournisseur.
 
 Si la sauvegarde refuse uniquement un manager `systemd` utilisateur et son
 auxiliaire `(sd-pam)`, `~ynh67` corrige le filtre. La publication seule ne suffit

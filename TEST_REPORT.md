@@ -1,4 +1,4 @@
-# Rapport de contrôle — Hermes Agent `0.21.0~ynh67`
+# Rapport de contrôle — Hermes Agent `0.21.0~ynh68`
 
 ## Candidate
 
@@ -21,7 +21,7 @@
 | Environnement Python PM | RÉUSSI | Construction isolée avec dépendances verrouillées |
 | Dashboard web | RÉUSSI | TypeScript et build de la source Hermes |
 | TUI embarqué | RÉUSSI | Build amont nécessaire au chat |
-| Tests du paquet | RÉUSSI | 24 tests, dont identité des managers système et réparation ciblée |
+| Tests du paquet | RÉUSSI | 25 tests, dont sélection du TUI précompilé sans préparation runtime |
 | Contraste AA des boutons principaux | RÉUSSI | Ratio texte/fond ≥ 4,5 pour les deux palettes |
 | Diff Git | RÉUSSI | Pas d'erreur de whitespace |
 | Revue indépendante | HISTORIQUE | Revue du socle ~ynh63 ; corrections ~ynh64/~ynh65 contrôlées localement |
@@ -45,6 +45,18 @@ catalogue des thèmes et le refus d'une API protégée sans jeton.
 | Promotion Stable | NON_EXÉCUTÉ | Recette client et autorisation séparée requises |
 
 ## Conclusion
+
+Diagnostic Chat : terminal monté, connexion WebSocket acceptée (101), aucun
+octet d'affichage reçu pendant l'observation ; aucune exception JavaScript.
+L'environnement du service ne contient pas `HERMES_TUI_DIR`. Le lanceur utilise
+alors la fraîcheur d'un build source, qui exige un Node PM installé, puis peut
+entrer dans la préparation/reconstruction au runtime.
+
+`~ynh68` déclare explicitement le TUI construit via `HERMES_TUI_DIR`. Une
+régression exécutant le vrai lanceur reproduit le chemin rebuild avant le
+correctif puis prouve qu'il n'appelle plus la fraîcheur ni la préparation.
+La recette d'affichage réel du TUI après upgrade reste à confirmer ; aucun
+message utilisateur n'a été envoyé pendant le diagnostic.
 
 Échec de sauvegarde avant upgrade : le journal Root montre uniquement `systemd`
 et son enfant `(sd-pam)` sous l'utilisateur applicatif. L'attente ne résout pas

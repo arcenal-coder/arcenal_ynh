@@ -14,6 +14,8 @@ Environment=HERMES_HOME=__DATA_DIR__
 Environment=HERMES_RUNTIME_DIR=__DATA_DIR__/tools
 Environment=PYTHONDONTWRITEBYTECODE=1
 Environment=HERMES_NODE=__HERMES_NODE__
+# Le TUI est compilé par le paquet : aucune acquisition PM ou rebuild au clic Chat.
+Environment=HERMES_TUI_DIR=__INSTALL_DIR__/ui-tui
 # Interdit les assistants interactifs dans le service.
 Environment=HERMES_NONINTERACTIVE=1
 # L'interface est déjà construite pendant l'installation ou la mise à niveau.
