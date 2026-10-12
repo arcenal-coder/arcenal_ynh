@@ -1,6 +1,6 @@
 # Recette Hermes Agent pour YunoHost
 
-Candidate Preview : `0.21.0~ynh68`. Identifiant conservé : `arcenal`.
+Candidate Preview : `0.21.0~ynh69`. Identifiant conservé : `arcenal`.
 
 ## Source exacte
 
@@ -58,6 +58,12 @@ le navigateur puis ouvrir Sessions pour confirmer le parcours visible.
 `~ynh68` sélectionne le TUI précompilé au clic Chat. Après upgrade, recharger
 complètement le navigateur puis ouvrir Chat et vérifier que le terminal affiche
 son écran initial, avant d'envoyer un message ou de choisir un fournisseur.
+
+`~ynh69` construit le frontend avec la base du chemin YunoHost afin de corriger
+les préchargements CSS/JS de Chat. Dans le réseau du navigateur, les assets
+doivent rester sous le chemin de l'application, par exemple `/arcenal/assets/`,
+et ne pas partir vers `/assets/` puis la page SSO. Vérifier clic Chat et
+rechargement direct de sa route après une actualisation complète du navigateur.
 
 Si la sauvegarde refuse uniquement un manager `systemd` utilisateur et son
 auxiliaire `(sd-pam)`, `~ynh67` corrige le filtre. La publication seule ne suffit

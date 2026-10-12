@@ -1,4 +1,4 @@
-# Rapport de contrôle — Hermes Agent `0.21.0~ynh68`
+# Rapport de contrôle — Hermes Agent `0.21.0~ynh69`
 
 ## Candidate
 
@@ -21,7 +21,9 @@
 | Environnement Python PM | RÉUSSI | Construction isolée avec dépendances verrouillées |
 | Dashboard web | RÉUSSI | TypeScript et build de la source Hermes |
 | TUI embarqué | RÉUSSI | Build amont nécessaire au chat |
-| Tests du paquet | RÉUSSI | 25 tests, dont sélection du TUI précompilé sans préparation runtime |
+| Tests du paquet | RÉUSSI | 29 tests, dont adaptation de la base Vite et sélection du TUI précompilé |
+| Build avec base `/arcenal/` | RÉUSSI | Compilateur Hermes réel, TypeScript et Vite sur une copie de la source épinglée |
+| Préchargement Chat sous SSO strict | RÉUSSI | Échec reproduit avant correction, interface et flux PTY après ; aucun asset demandé hors `/arcenal` |
 | Contraste AA des boutons principaux | RÉUSSI | Ratio texte/fond ≥ 4,5 pour les deux palettes |
 | Diff Git | RÉUSSI | Pas d'erreur de whitespace |
 | Revue indépendante | HISTORIQUE | Revue du socle ~ynh63 ; corrections ~ynh64/~ynh65 contrôlées localement |
@@ -45,6 +47,19 @@ catalogue des thèmes et le refus d'une API protégée sans jeton.
 | Promotion Stable | NON_EXÉCUTÉ | Recette client et autorisation séparée requises |
 
 ## Conclusion
+
+Cause confirmée par la console client : les préchargements Vite demandent
+`/assets/ChatPage-*.js` et `/assets/xterm-*.css`, hors du sous-chemin protégé.
+SSOwat renvoie du HTML et le navigateur refuse ces types MIME. Le test strict
+reproduit `Unable to preload CSS` et la disparition complète de l'interface.
+Les premiers proxys de diagnostic acceptaient trop largement les URLs racine.
+
+`~ynh69` adapte la seule propriété de base du fichier de configuration Vite
+avant compilation au chemin alloué par YunoHost. Aucun changement à SSOwat,
+aucune route publique `/assets`, aucun filtre MIME désactivé. Le frontend
+reconstruit conserve l'interface et reçoit le flux PTY avec le même proxy strict.
+La source de test est une copie temporaire du commit épinglé ; ni le code du
+serveur actuel ni les sessions utilisateur n'ont été remplacés par ce test.
 
 Diagnostic Chat : terminal monté, connexion WebSocket acceptée (101), aucun
 octet d'affichage reçu pendant l'observation ; aucune exception JavaScript.

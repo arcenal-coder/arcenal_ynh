@@ -55,7 +55,7 @@ class BootstrapTests(unittest.TestCase):
         fixture = home / "fixture-python"
         fixture.write_text("#!/bin/sh\nexit 0\n")
         fixture.chmod(0o755)
-        env = dict(os.environ, app="fixture", install_dir=str(home / "app"),
+        env = dict(os.environ, app="fixture", path="/arcenal", install_dir=str(home / "app"),
                    data_dir=str(home / "data"), COMMON=str(PACKAGE / "scripts/_common.sh"),
                    FIXTURE_PYTHON=str(fixture), EVENTS=str(home / "events"), MISSING=missing)
         return subprocess.run(["bash", "-c", HARNESS], env=env, text=True, capture_output=True)

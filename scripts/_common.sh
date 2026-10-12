@@ -6,6 +6,9 @@ hermes_build() {
     # Bookworm peut fournir Python 3.11.2, sans filtres tarfile. Le helper
     # YunoHost extrait d'abord le Python épinglé par Hermes avec le tar système.
     ynh_setup_source --source_id=python --dest_dir="$install_dir/.bootstrap-python"
+    # La réécriture HTML du backend ne corrige pas les préchargements Vite
+    # intégrés aux modules : leur base doit être fixée avant compilation.
+    python3 ../conf/prepare_web_base.py --source "$install_dir" --path "$path"
     chown -R "$app:$app" "$install_dir"
     local bootstrap="$install_dir/.bootstrap-python/bin/python3"
     test -x "$bootstrap" || ynh_die "Le Python d'amorçage Hermes est absent."
@@ -30,7 +33,7 @@ hermes_build() {
     ynh_exec_as_app "$bootstrap" "$install_dir/scripts/write_install_stamp.py" \
         --output "$install_dir/install-stamp.json" --update-mechanism external \
         --commit 0aa764feddf00aed631019763ef777d38faf4335 --source yunohost \
-        --display-version "0.21.0~ynh68"
+        --display-version "0.21.0~ynh69"
     chown -R "root:$app" "$install_dir"
     chmod -R u=rwX,g=rX,o= "$install_dir"
 }
