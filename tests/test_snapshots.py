@@ -34,7 +34,22 @@ ynh_permission_url() { return 0; }
 ynh_permission_update() { printf '%s\n' "$*" >> "$EVENTS"; }
 ynh_die() { printf '%s\n' "$*" >&2; exit 1; }
 yunohost() { printf '%s\n' '{"allowed":["admins","all_users"]}'; }
-pgrep() { test "$WRITER" = active; }
+pgrep() {
+    case "$WRITER" in
+        active) return 0 ;;
+        error) return 2 ;;
+        transient)
+            local count=0
+            if [ -f "$POLL_COUNT" ]; then read -r count < "$POLL_COUNT"; fi
+            count=$((count + 1))
+            printf '%s\n' "$count" > "$POLL_COUNT"
+            test "$count" -lt 3
+            ;;
+        *) return 1 ;;
+    esac
+}
+sleep() { return 0; }
+ps() { return 0; }
 chown() { return 0; }
 curl() { return 0; }
 builtin source "$SCRIPT"
@@ -46,11 +61,30 @@ def execute(script, home, writer="none"):
                data_dir=str(home / "data"), domain="example.test", path="/arcenal",
                port="9119", COMMON=str(PACKAGE / "scripts/_common.sh"),
                SCRIPT=str(PACKAGE / "scripts" / script), EVENTS=str(home / "events"),
-               WRITER=writer)
+               WRITER=writer, POLL_COUNT=str(home / "polls"))
     return subprocess.run(["bash", "-c", HARNESS], env=env, capture_output=True, text=True)
 
 
 class SnapshotTests(unittest.TestCase):
+    def test_waits_for_transient_processes_before_snapshot(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            (home / "app").mkdir()
+            (home / "data").mkdir()
+            result = execute("backup", home, writer="transient")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((home / "app/.ynh-data-snapshot.tar").exists())
+            self.assertEqual(int((home / "polls").read_text()), 3)
+
+    def test_refuses_snapshot_if_process_check_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            (home / "app").mkdir()
+            (home / "data").mkdir()
+            result = execute("backup", home, writer="error")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertFalse((home / "app/.ynh-data-snapshot.tar").exists())
+
     def test_restores_frozen_database_not_late_live_copy(self):
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)

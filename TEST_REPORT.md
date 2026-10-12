@@ -1,4 +1,4 @@
-# Rapport de contrôle — Hermes Agent `0.21.0~ynh63`
+# Rapport de contrôle — Hermes Agent `0.21.0~ynh64`
 
 ## Candidate
 
@@ -20,7 +20,7 @@
 | Environnement Python PM | RÉUSSI | Construction isolée avec dépendances verrouillées |
 | Dashboard web | RÉUSSI | TypeScript et build de la source Hermes |
 | TUI embarqué | RÉUSSI | Build amont nécessaire au chat |
-| Tests du paquet | RÉUSSI | 9 tests, configuration, thèmes, snapshots et HTTP réel |
+| Tests du paquet | RÉUSSI | 11 tests, dont processus transitoire, processus persistant et erreur du contrôle |
 | Contraste AA des boutons principaux | RÉUSSI | Ratio texte/fond ≥ 4,5 pour les deux palettes |
 | Diff Git | RÉUSSI | Pas d'erreur de whitespace |
 | Revue indépendante | RÉUSSI | Constats P1 corrigés après trois passes ciblées |
@@ -44,6 +44,11 @@ catalogue des thèmes et le refus d'une API protégée sans jeton.
 | Promotion Stable | NON_EXÉCUTÉ | Recette client et autorisation séparée requises |
 
 ## Conclusion
+
+Recette `~ynh63` : ÉCHEC sur YunoHost 12.1.40.1, lors du contrôle immédiat
+des processus après arrêt des trois services. La correction `~ynh64` ajoute
+une attente bornée et conserve le refus en présence de processus persistants.
+Le test du processus transitoire échoue sur `~ynh63`, avant correction.
 
 Candidate préparée pour qualification sur une instance jetable.
 **Pas prête pour une installation de production ni une promotion Stable.**

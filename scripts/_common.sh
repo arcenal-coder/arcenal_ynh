@@ -20,7 +20,7 @@ hermes_build() {
     python3 "$install_dir/scripts/write_install_stamp.py" \
         --output "$install_dir/install-stamp.json" --update-mechanism external \
         --commit 0aa764feddf00aed631019763ef777d38faf4335 --source yunohost \
-        --display-version "0.21.0~ynh63"
+        --display-version "0.21.0~ynh64"
     chown -R "root:$app" "$install_dir"
     chmod -R u=rwX,g=rX,o= "$install_dir"
 }
@@ -49,11 +49,21 @@ hermes_admin_permission() {
 }
 
 hermes_quiescent_data() {
-    # Un gateway détaché n'est pas arrêté par le service dashboard : refuser
-    # une sauvegarde incohérente plutôt que tuer un travail utilisateur.
-    if pgrep -u "$app" >/dev/null; then
-        ynh_die "Des processus Hermes sont encore actifs. Arrêtez les gateways avant la sauvegarde."
-    fi
+    # Les enfants détachés peuvent terminer après systemctl stop. Attendre
+    # leur sortie avant de refuser, sans tuer de processus utilisateur.
+    local attempt status
+    for attempt in {0..30}; do
+        status=0
+        pgrep -u "$app" >/dev/null || status=$?
+        case "$status" in
+            1) return 0 ;;
+            0) [ "$attempt" -eq 30 ] || sleep 1 ;;
+            *) ynh_die "Impossible de vérifier les processus de $app ; sauvegarde interrompue." ;;
+        esac
+    done
+    # Les noms et PID suffisent au diagnostic ; aucun argument potentiellement secret.
+    ps -u "$app" -o pid,ppid,stat,comm >&2
+    ynh_die "Des processus de $app persistent après 30 secondes. Arrêtez les gateways actifs avant de réessayer."
 }
 
 hermes_retire_privileges() {

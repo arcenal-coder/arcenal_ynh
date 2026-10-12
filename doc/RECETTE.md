@@ -1,6 +1,6 @@
 # Recette Hermes Agent pour YunoHost
 
-Candidate locale : `0.21.0~ynh63`. Identifiant conservé : `arcenal`.
+Candidate Preview : `0.21.0~ynh64`. Identifiant conservé : `arcenal`.
 
 ## Source exacte
 
@@ -13,9 +13,9 @@ Candidate locale : `0.21.0~ynh63`. Identifiant conservé : `arcenal`.
 
 ## Conditions préalables
 
-La candidate n'est pas publiée dans ARCenal Store et n'a pas encore été
-qualifiée par `package_check` sur YunoHost. Ne pas effectuer de recette
-destructive sur l'unique serveur en ligne.
+La qualification par `package_check` sur YunoHost reste à effectuer. Le client
+a choisi la recette d'upgrade sur son serveur actuel ; installation fraîche,
+désinstallation et restauration expérimentale n'y sont pas autorisées.
 
 L'ancien paquet ne sauvegardait que les données. Avant sa première mise à
 niveau, une sauvegarde indépendante doit inclure code, environnement Python,
@@ -35,6 +35,11 @@ Un gateway détaché encore actif fait échouer la sauvegarde : arrêter les
 gateways via Hermes avant de réessayer. Le dashboard reprend après sauvegarde.
 La restauration conserve le dossier remplacé à côté des données comme copie
 de récupération, sans l'exposer par Nginx.
+
+La révision `~ynh63` a refusé un upgrade immédiatement après l'arrêt des
+services, sur présence de processus `arcenal`. La révision `~ynh64` attend
+leur terminaison jusqu'à 30 secondes. Elle refuse toujours si des processus
+persistent ou si le contrôle échoue, sans lancer de commande de terminaison.
 
 ## Recette sur instance jetable
 
