@@ -3,24 +3,34 @@
 # Le gestionnaire PM amont vérifie ses outils épinglés : aucun curl | sh.
 hermes_build() {
     ynh_setup_source --dest_dir="$install_dir" --full_replace=1
+    # Bookworm peut fournir Python 3.11.2, sans filtres tarfile. Le helper
+    # YunoHost extrait d'abord le Python épinglé par Hermes avec le tar système.
+    ynh_setup_source --source_id=python --dest_dir="$install_dir/.bootstrap-python"
     chown -R "$app:$app" "$install_dir"
+    local bootstrap="$install_dir/.bootstrap-python/bin/python3"
+    test -x "$bootstrap" || ynh_die "Le Python d'amorçage Hermes est absent."
+    ynh_exec_as_app "$bootstrap" -c \
+        'import inspect, tarfile; assert "filter" in inspect.signature(tarfile.TarFile.extractall).parameters'
     local environment="$install_dir/.runtime-$(date +%s)-$$"
     ynh_exec_as_app env HOME="$data_dir" HERMES_HOME="$data_dir" \
         HERMES_RUNTIME_DIR="$install_dir/.tools" PYTHONPATH="$install_dir" \
-        python3 -m pm.build_env --source "$install_dir" --out "$environment" \
+        "$bootstrap" -m pm.build_env --source "$install_dir" --out "$environment" \
         --extra web --extra pty --extra cron --extra mcp
     hermes_python="$environment/bin/python"
     ynh_app_setting_set --key=hermes_python --value="$hermes_python"
-    hermes_node="$(command -v node)"
+    local nodejs_version
+    nodejs_version=$(ynh_app_setting_get --key=nodejs_version)
+    hermes_node="/opt/node_n/n/versions/node/$nodejs_version/bin/node"
+    test -x "$hermes_node" || ynh_die "Le runtime Node YunoHost est absent."
     ynh_app_setting_set --key=hermes_node --value="$hermes_node"
     ynh_exec_as_app env HOME="$data_dir" npm --prefix "$install_dir" ci \
         --workspace web --workspace ui-tui --include-workspace-root --include=dev
     ynh_exec_as_app env HOME="$data_dir" npm --prefix "$install_dir" run build --workspace web
     ynh_exec_as_app env HOME="$data_dir" npm --prefix "$install_dir" run build --workspace ui-tui
-    python3 "$install_dir/scripts/write_install_stamp.py" \
+    ynh_exec_as_app "$bootstrap" "$install_dir/scripts/write_install_stamp.py" \
         --output "$install_dir/install-stamp.json" --update-mechanism external \
         --commit 0aa764feddf00aed631019763ef777d38faf4335 --source yunohost \
-        --display-version "0.21.0~ynh64"
+        --display-version "0.21.0~ynh65"
     chown -R "root:$app" "$install_dir"
     chmod -R u=rwX,g=rX,o= "$install_dir"
 }

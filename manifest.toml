@@ -7,7 +7,7 @@ name = "Hermes Agent"
 description."en" = "Self-hosted Hermes assistant with its official dashboard and Gratitude theme"
 description."fr" = "Assistant Hermes auto-hébergé avec son dashboard officiel et le thème Gratitude"
 
-version = "0.21.0~ynh64"
+version = "0.21.0~ynh65"
 
 maintainers = ["compteonyx"]
 
@@ -69,3 +69,11 @@ ram.runtime = "1G"
         url = "https://codeload.github.com/NousResearch/hermes-agent/tar.gz/0aa764feddf00aed631019763ef777d38faf4335"
         format = "tar.gz"
         sha256 = "272c31c21e859394f512aa41bb20a1fa8ca45988fcb12fd3bdc971e3f5990cf8"
+
+        # Même distribution CPython que pm/lock.json dans la source Hermes.
+        [resources.sources.python]
+        format = "tar.gz"
+        amd64.url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260901/cpython-3.14.7+20260901-x86_64-unknown-linux-gnu-install_only.tar.gz"
+        amd64.sha256 = "0ab3305457051cd3e7c031857e005f1bda17c218a1990567dacaaac6dd1d14f0"
+        arm64.url = "https://github.com/astral-sh/python-build-standalone/releases/download/20260901/cpython-3.14.7+20260901-aarch64-unknown-linux-gnu-install_only.tar.gz"
+        arm64.sha256 = "30f1cc489be654477d895b441e196bb080738bf0456da82080ad4ab66a22d80f"

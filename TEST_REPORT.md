@@ -1,4 +1,4 @@
-# Rapport de contrôle — Hermes Agent `0.21.0~ynh64`
+# Rapport de contrôle — Hermes Agent `0.21.0~ynh65`
 
 ## Candidate
 
@@ -15,15 +15,16 @@
 | --- | --- | --- |
 | Syntaxe des scripts Bash | RÉUSSI | Tous les scripts du paquet |
 | Lecture TOML | RÉUSSI | Manifeste, panneau de configuration et tests |
+| Python d'amorçage | RÉUSSI | Archives amd64/arm64 téléchargées, SHA-256 et chemins vérifiés ; pins conformes à pm/lock.json |
 | Ruff | RÉUSSI | Configuration du paquet et tests Python |
 | ty | RÉUSSI | Helper de configuration avec source/runtime Hermes |
 | Environnement Python PM | RÉUSSI | Construction isolée avec dépendances verrouillées |
 | Dashboard web | RÉUSSI | TypeScript et build de la source Hermes |
 | TUI embarqué | RÉUSSI | Build amont nécessaire au chat |
-| Tests du paquet | RÉUSSI | 11 tests, dont processus transitoire, processus persistant et erreur du contrôle |
+| Tests du paquet | RÉUSSI | 14 tests, dont choix du Python d'amorçage, pins, refus de fallback et quiescence |
 | Contraste AA des boutons principaux | RÉUSSI | Ratio texte/fond ≥ 4,5 pour les deux palettes |
 | Diff Git | RÉUSSI | Pas d'erreur de whitespace |
-| Revue indépendante | RÉUSSI | Constats P1 corrigés après trois passes ciblées |
+| Revue indépendante | HISTORIQUE | Revue du socle ~ynh63 ; corrections ~ynh64/~ynh65 contrôlées localement |
 
 Les tests de snapshots exécutent les scripts et `tar` sur un dossier temporaire
 avec SQLite. Les appels YunoHost et systemd sont simulés. Le smoke test démarre
@@ -44,6 +45,17 @@ catalogue des thèmes et le refus d'une API protégée sans jeton.
 | Promotion Stable | NON_EXÉCUTÉ | Recette client et autorisation séparée requises |
 
 ## Conclusion
+
+Recette `~ynh64` : ÉCHEC d'installation sur Bookworm, car le Python système
+ne supporte pas `TarFile.extractall(filter=...)`. `~ynh65` extrait d'abord,
+avec les helpers YunoHost, le CPython autonome épinglé par Hermes. PM et le
+marquage de version sont lancés avec cet interpréteur. Le Python système reste
+inchangé et les filtres de sécurité PM ne sont pas désactivés.
+
+Les tests d'amorçage simulent les helpers et vérifient la commande invoquée ;
+ils ne constituent pas une installation Linux complète. Les archives réelles
+amd64/arm64 sont vérifiées séparément. La sélection de Node utilise aussi
+explicitement le runtime YunoHost, pas le Node global du serveur.
 
 Recette `~ynh63` : ÉCHEC sur YunoHost 12.1.40.1, lors du contrôle immédiat
 des processus après arrêt des trois services. La correction `~ynh64` ajoute

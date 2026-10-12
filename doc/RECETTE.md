@@ -1,6 +1,6 @@
 # Recette Hermes Agent pour YunoHost
 
-Candidate Preview : `0.21.0~ynh64`. Identifiant conservé : `arcenal`.
+Candidate Preview : `0.21.0~ynh65`. Identifiant conservé : `arcenal`.
 
 ## Source exacte
 
@@ -10,6 +10,9 @@ Candidate Preview : `0.21.0~ynh64`. Identifiant conservé : `arcenal`.
 - Gratitude est fourni par le paquet sous forme de thèmes utilisateur Hermes,
   dans le sélecteur officiel : Clair, Sombre et Système.
 - Les fournisseurs et secrets sont configurés depuis le dashboard Hermes.
+- Python d'amorçage : CPython autonome issu des mêmes pins que `pm/lock.json`,
+  téléchargé/vérifié/extrait par YunoHost avant de démarrer PM. Aucun changement
+  du Python système ; filtres d'extraction de sécurité conservés.
 
 ## Conditions préalables
 
@@ -40,6 +43,10 @@ La révision `~ynh63` a refusé un upgrade immédiatement après l'arrêt des
 services, sur présence de processus `arcenal`. La révision `~ynh64` attend
 leur terminaison jusqu'à 30 secondes. Elle refuse toujours si des processus
 persistent ou si le contrôle échoue, sans lancer de commande de terminaison.
+
+La révision `~ynh64` a échoué à l'installation sur Python Bookworm ancien,
+qui ne connaît pas `TarFile.extractall(filter=...)`. `~ynh65` utilise dès
+l'amorçage le CPython épinglé par Hermes, fourni sous le code applicatif.
 
 ## Recette sur instance jetable
 
