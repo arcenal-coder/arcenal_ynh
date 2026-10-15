@@ -1,12 +1,13 @@
 # Recette Hermes Agent pour YunoHost
 
-Candidate Preview : `0.21.0~ynh69`. Identifiant conservé : `arcenal`.
+Candidate locale à publier en Preview : `0.22.2~ynh1`. Identifiant conservé : `arcenal`.
 
 ## Source exacte
 
-- Hermes amont : `0aa764feddf00aed631019763ef777d38faf4335`.
+- Hermes amont : release stable `v0.22.2`, commit `d923a5eb487a17c0a68801bba9ef0f56c81040a8`.
 - Archive : URL immutable par commit déclarée dans `manifest.toml`.
-- SHA-256 : `272c31c21e859394f512aa41bb20a1fa8ca45988fcb12fd3bdc971e3f5990cf8`.
+- SHA-256 : `616649f8ac7e3bb186999d000d77511e733b3930bd2b5921be4a85673320ef8b`.
+- Rapport de préparation de la mise à jour : `UPDATE_V0.22.2.md`.
 - Gratitude est fourni par le paquet sous forme de thèmes utilisateur Hermes,
   dans le sélecteur officiel : Clair, Sombre et Système.
 - Les fournisseurs et secrets sont configurés depuis le dashboard Hermes.

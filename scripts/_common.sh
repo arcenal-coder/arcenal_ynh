@@ -32,8 +32,8 @@ hermes_build() {
     ynh_exec_as_app env HOME="$data_dir" npm --prefix "$install_dir" run build --workspace ui-tui
     ynh_exec_as_app "$bootstrap" "$install_dir/scripts/write_install_stamp.py" \
         --output "$install_dir/install-stamp.json" --update-mechanism external \
-        --commit 0aa764feddf00aed631019763ef777d38faf4335 --source yunohost \
-        --display-version "0.21.0~ynh69"
+        --commit d923a5eb487a17c0a68801bba9ef0f56c81040a8 --source yunohost \
+        --base-version "0.22.2" --distance 0 --display-version "0.22.2~ynh1"
     chown -R "root:$app" "$install_dir"
     chmod -R u=rwX,g=rX,o= "$install_dir"
 }

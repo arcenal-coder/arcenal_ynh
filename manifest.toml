@@ -7,7 +7,7 @@ name = "Hermes Agent"
 description."en" = "Self-hosted Hermes assistant with its official dashboard and Gratitude theme"
 description."fr" = "Assistant Hermes auto-hébergé avec son dashboard officiel et le thème Gratitude"
 
-version = "0.21.0~ynh69"
+version = "0.22.2~ynh1"
 
 maintainers = ["compteonyx"]
 
@@ -66,9 +66,9 @@ ram.runtime = "1G"
 
     [resources.sources]
         [resources.sources.main]
-        url = "https://codeload.github.com/NousResearch/hermes-agent/tar.gz/0aa764feddf00aed631019763ef777d38faf4335"
+        url = "https://codeload.github.com/NousResearch/hermes-agent/tar.gz/d923a5eb487a17c0a68801bba9ef0f56c81040a8"
         format = "tar.gz"
-        sha256 = "272c31c21e859394f512aa41bb20a1fa8ca45988fcb12fd3bdc971e3f5990cf8"
+        sha256 = "616649f8ac7e3bb186999d000d77511e733b3930bd2b5921be4a85673320ef8b"
 
         # Même distribution CPython que pm/lock.json dans la source Hermes.
         [resources.sources.python]

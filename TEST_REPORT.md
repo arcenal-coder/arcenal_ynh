@@ -1,13 +1,15 @@
-# Rapport de contrôle — Hermes Agent `0.21.0~ynh69`
+# Rapport de contrôle — Hermes Agent `0.22.2~ynh1`
 
 ## Candidate
 
-- Source : Hermes `0aa764feddf00aed631019763ef777d38faf4335`.
+- Source stable : Hermes `v0.22.2`, commit `d923a5eb487a17c0a68801bba9ef0f56c81040a8`.
 - SHA-256 téléchargé et vérifié :
-  `272c31c21e859394f512aa41bb20a1fa8ca45988fcb12fd3bdc971e3f5990cf8`.
+  `616649f8ac7e3bb186999d000d77511e733b3930bd2b5921be4a85673320ef8b`.
 - Identifiant YunoHost conservé : `arcenal`.
-- État : candidate Preview ; publication autorisée par le client pour recette
-  sur son YunoHost actuel. La qualification complète reste NON_EXÉCUTÉE.
+- État : candidate dont la publication Preview est validée par le client.
+- Preuves actuelles et compatibilité : `doc/UPDATE_V0.22.2.md`.
+- Les incidents `~ynh63` à `~ynh69` décrits ci-dessous sont HISTORIQUES et
+  documentent les adaptations conservées, pas une nouvelle recette client v0.22.2.
 
 ## Contrôles locaux
 
