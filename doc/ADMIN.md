@@ -1,4 +1,4 @@
-# Administration — Hermes Agent sur YunoHost
+# Administration — ARCenal Agent sur YunoHost
 
 ## Architecture
 
@@ -14,7 +14,7 @@
 
 ## Utilisation
 
-Ouvrir la tuile Hermes Agent depuis le portail YunoHost avec un administrateur.
+Ouvrir la tuile ARCenal Agent depuis le portail YunoHost avec un administrateur.
 Configurer les fournisseurs, modèles et secrets dans le dashboard Hermes.
 Le panneau YunoHost indique ce parcours et ne réécrit pas la configuration.
 

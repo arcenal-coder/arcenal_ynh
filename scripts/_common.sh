@@ -9,6 +9,7 @@ hermes_build() {
     # La réécriture HTML du backend ne corrige pas les préchargements Vite
     # intégrés aux modules : leur base doit être fixée avant compilation.
     python3 ../conf/prepare_web_base.py --source "$install_dir" --path "$path"
+    python3 ../conf/prepare_arcenal.py --source "$install_dir"
     chown -R "$app:$app" "$install_dir"
     local bootstrap="$install_dir/.bootstrap-python/bin/python3"
     test -x "$bootstrap" || ynh_die "Le Python d'amorçage Hermes est absent."
@@ -33,7 +34,7 @@ hermes_build() {
     ynh_exec_as_app "$bootstrap" "$install_dir/scripts/write_install_stamp.py" \
         --output "$install_dir/install-stamp.json" --update-mechanism external \
         --commit d923a5eb487a17c0a68801bba9ef0f56c81040a8 --source yunohost \
-        --base-version "0.22.2" --distance 0 --display-version "0.22.2~ynh1"
+        --base-version "0.22.2" --distance 0 --display-version "0.22.2~ynh2"
     chown -R "root:$app" "$install_dir"
     chmod -R u=rwX,g=rX,o= "$install_dir"
 }
@@ -46,7 +47,14 @@ hermes_configure() {
     ynh_config_add_nginx
     hermes_admin_permission
     ynh_config_add_systemd --template=arcenal.service
-    yunohost service add "$app" --description="Hermes Agent" --log="$data_dir/logs/gui.log"
+    yunohost service add "$app" --description="ARCenal Agent" --log="$data_dir/logs/gui.log"
+    # Migrer seulement le libellé par défaut, pas un nom personnalisé.
+    local current_label
+    current_label=$(yunohost app info "$app" --output-as json | python3 -c \
+        'import json,sys; print(json.load(sys.stdin).get("name", ""))')
+    if [ "$current_label" = "Hermes Agent" ]; then
+        yunohost app change-label "$app" "ARCenal Agent"
+    fi
 }
 
 hermes_admin_permission() {

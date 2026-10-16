@@ -1,6 +1,6 @@
-# Recette Hermes Agent pour YunoHost
+# Recette ARCenal Agent pour YunoHost
 
-Candidate locale à publier en Preview : `0.22.2~ynh1`. Identifiant conservé : `arcenal`.
+Candidate locale à publier en Preview : `0.22.2~ynh2`. Identifiant conservé : `arcenal`.
 
 ## Source exacte
 

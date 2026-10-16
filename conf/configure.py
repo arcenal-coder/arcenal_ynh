@@ -69,20 +69,39 @@ def install_themes(home: Path) -> None:
             path.chmod(0o600)
 
 
+def install_arcenal_skin(home: Path) -> None:
+    directory = home / "skins"
+    directory.mkdir(mode=0o700, exist_ok=True)
+    path = directory / "arcenal.yaml"
+    if not path.exists():
+        value = {"name": "arcenal", "description": "ARCenal Agent sur YunoHost",
+                 "banner_logo": "[bold #B84B2C]ARCenal Agent[/]",
+                 "branding": {"agent_name": "ARCenal Agent", "response_label": " ARCenal Agent ",
+                              "welcome": "ARCenal Agent est prêt."}}
+        with path.open("x", encoding="utf-8") as stream:
+            json.dump(value, stream, ensure_ascii=False, indent=2)
+        path.chmod(0o600)
+
+
 def configure() -> None:
     from hermes_cli.config import atomic_config_write, load_config
 
     home = Path(os.environ["HERMES_HOME"])
     install_themes(home)
+    install_arcenal_skin(home)
     existing = (home / "config.yaml").exists()
     config = load_config()
     initialized = home / ".yunohost-gratitude-initialized"
+    branded = home / ".yunohost-arcenal-initialized"
     changed = False
     # PM peut créer config.yaml avant ce helper. Son thème générique ne doit
     # pas empêcher l'habillage demandé ; une migration unique préserve ensuite
     # tous les choix de l'utilisateur, y compris un retour à Hermes Teal.
     if not initialized.exists() and config.get("dashboard", {}).get("theme") in (None, "default"):
         config.setdefault("dashboard", {})["theme"] = "gratitude-system"
+        changed = True
+    if not branded.exists() and config.get("display", {}).get("skin") in (None, "default"):
+        config.setdefault("display", {})["skin"] = "arcenal"
         changed = True
     if not existing:
         config.setdefault("terminal", {})["cwd"] = str(home)
@@ -93,6 +112,9 @@ def configure() -> None:
         with initialized.open("x", encoding="utf-8") as stream:
             stream.write("gratitude-initialized-v1\n")
         initialized.chmod(0o600)
+    if not branded.exists():
+        branded.write_text("arcenal-branding-v1\n", encoding="utf-8")
+        branded.chmod(0o600)
     (home / "config.yaml").chmod(0o600)
     for name in (".env", "auth.json"):
         secret_file = home / name

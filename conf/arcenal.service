@@ -1,5 +1,5 @@
 [Unit]
-Description=Hermes Agent — dashboard natif YunoHost
+Description=ARCenal Agent — dashboard natif YunoHost
 After=network.target
 
 [Service]

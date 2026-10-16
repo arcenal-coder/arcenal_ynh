@@ -1,6 +1,7 @@
 """Contrats de configuration exécutés avec le runtime Hermes réel."""
 
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -56,11 +57,42 @@ class ConfigurationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
             config = home / "config.yaml"
-            original = "# Personnalisation conservée\ndashboard:\n  theme: midnight\n"
+            original = "# Personnalisation conservée\ndashboard:\n  theme: midnight\ndisplay:\n  skin: mono\n"
             config.write_text(original)
             with patch.dict(os.environ, {"HERMES_HOME": directory}):
                 configuration.configure()
             self.assertEqual(config.read_text(), original)
+
+    def test_default_cli_brand_is_arcenal(self):
+        from hermes_cli.config import cfg_get, load_config
+        from hermes_cli.skin_engine import load_skin
+
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.dict(os.environ, {"HERMES_HOME": directory}):
+                configuration.configure()
+                self.assertEqual(cfg_get(load_config(), "display", "skin"), "arcenal")
+                skin = load_skin("arcenal")
+                self.assertEqual(skin.branding["agent_name"], "ARCenal Agent")
+
+    def test_wide_cli_banner_renders_arcenal_logo(self):
+        from hermes_cli import banner
+        from hermes_cli.skin_engine import load_skin
+        from rich.console import Console
+
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.dict(os.environ, {"HERMES_HOME": directory, "COLUMNS": "140"}):
+                configuration.configure()
+                skin = load_skin("arcenal")
+                output = io.StringIO()
+                with patch.object(banner, "_active_skin", return_value=skin), \
+                        patch.object(banner, "get_update_result", return_value=0), \
+                        patch.object(banner, "get_latest_release_tag", return_value=None):
+                    banner.build_welcome_banner(
+                        Console(file=output, width=140, color_system=None),
+                        model="fixture", cwd=directory, tools=[], availability={},
+                        skills_by_category={}, get_toolset_for_tool=lambda _: "fixture",
+                    )
+                self.assertEqual(output.getvalue().strip().splitlines()[0], "ARCenal Agent")
 
     def test_bootstrap_default_theme_is_initialized_to_gratitude(self):
         from hermes_cli.config import cfg_get, load_config

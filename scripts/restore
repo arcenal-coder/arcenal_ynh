@@ -28,6 +28,6 @@ ynh_app_setting_set --key=hermes_node --value="$hermes_node"
 ynh_config_add_systemd --template=arcenal.service
 hermes_admin_permission
 systemctl enable "$app.service" --quiet
-yunohost service add "$app" --description="Hermes Agent" --log="$data_dir/logs/gui.log"
+yunohost service add "$app" --description="ARCenal Agent" --log="$data_dir/logs/gui.log"
 hermes_start
 ynh_systemctl --service=nginx --action=reload

@@ -2,12 +2,12 @@
 version = "1.0"
 
 [main]
-name = "Hermes Agent"
+name = "ARCenal Agent"
 
     [main.dashboard]
-    name = "Dashboard Hermes"
+    name = "Dashboard ARCenal Agent"
 
         [main.dashboard.notice]
         type = "display_text"
-        ask.fr = "Configurez les fournisseurs, modèles et secrets dans le dashboard Hermes. L'accès est réservé aux administrateurs YunoHost."
-        ask.en = "Configure providers, models and secrets in the Hermes dashboard. Access is reserved to YunoHost administrators."
+        ask.fr = "Configurez les fournisseurs, modèles et secrets dans ARCenal Agent. Les mises à jour sont gérées par YunoHost."
+        ask.en = "Configure providers, models and secrets in ARCenal Agent. Updates are managed by YunoHost."

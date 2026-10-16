@@ -1,4 +1,4 @@
-# Rapport de contrôle — Hermes Agent `0.22.2~ynh1`
+# Rapport de contrôle — ARCenal Agent `0.22.2~ynh2`
 
 ## Candidate
 
@@ -6,7 +6,8 @@
 - SHA-256 téléchargé et vérifié :
   `616649f8ac7e3bb186999d000d77511e733b3930bd2b5921be4a85673320ef8b`.
 - Identifiant YunoHost conservé : `arcenal`.
-- État : candidate dont la publication Preview est validée par le client.
+- État : candidate locale de marque ARCenal Agent ; publication en attente.
+- Nouveau lot de marque et politique de mises à jour : `doc/ARCENAL_BRANDING.md`.
 - Preuves actuelles et compatibilité : `doc/UPDATE_V0.22.2.md`.
 - Les incidents `~ynh63` à `~ynh69` décrits ci-dessous sont HISTORIQUES et
   documentent les adaptations conservées, pas une nouvelle recette client v0.22.2.
@@ -23,12 +24,18 @@
 | Environnement Python PM | RÉUSSI | Construction isolée avec dépendances verrouillées |
 | Dashboard web | RÉUSSI | TypeScript et build de la source Hermes |
 | TUI embarqué | RÉUSSI | Build amont nécessaire au chat |
-| Tests du paquet | RÉUSSI | 29 tests, dont adaptation de la base Vite et sélection du TUI précompilé |
+| Tests du paquet | RÉUSSI | 36 tests Python sans omission + 1 test Node ; libellés YunoHost, bannières CLI/TUI, propriété externe et Chrome réel |
 | Build avec base `/arcenal/` | RÉUSSI | Compilateur Hermes réel, TypeScript et Vite sur une copie de la source épinglée |
 | Préchargement Chat sous SSO strict | RÉUSSI | Échec reproduit avant correction, interface et flux PTY après ; aucun asset demandé hors `/arcenal` |
 | Contraste AA des boutons principaux | RÉUSSI | Ratio texte/fond ≥ 4,5 pour les deux palettes |
 | Diff Git | RÉUSSI | Pas d'erreur de whitespace |
 | Revue indépendante | HISTORIQUE | Revue du socle ~ynh63 ; corrections ~ynh64/~ynh65 contrôlées localement |
+
+Lot de marque `~ynh2` : les deux constats P2 de la revue indépendante sont
+corrigés et vérifiés localement : lecture du champ `name` pour le libellé
+YunoHost et `banner_logo` natif pour les grandes bannières CLI/TUI.
+Les derniers changements n'affectent pas le frontend compilé ; le build adapté
+déjà validé est utilisé par le test Chrome rejoué avec les 36 tests Python.
 
 Les tests de snapshots exécutent les scripts et `tar` sur un dossier temporaire
 avec SQLite. Les appels YunoHost et systemd sont simulés. Le smoke test démarre
