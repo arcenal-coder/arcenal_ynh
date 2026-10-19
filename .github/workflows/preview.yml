@@ -1,7 +1,7 @@
 name: Verify native assistance preview
 on:
   push:
-    branches: [preview]
+    branches: [preview, prepare/hermes-v0.22.2]
     tags: ['v0.22.2-ynh*-preview']
   workflow_dispatch:
 permissions:
