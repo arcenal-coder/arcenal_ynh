@@ -17,6 +17,7 @@ chmod() { return 0; }
 ynh_exec_as_app() { return 0; }
 ynh_config_add_nginx() { return 0; }
 hermes_admin_permission() { return 0; }
+hermes_assistance_configure() { return 0; }
 ynh_config_add_systemd() { return 0; }
 yunohost() {
     case "$1 $2" in

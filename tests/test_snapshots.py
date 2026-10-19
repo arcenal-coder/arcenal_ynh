@@ -29,6 +29,12 @@ ynh_abort_if_errors() { set -e; }
 ynh_app_setting_get() { printf '%s\n' fixture-node; }
 ynh_app_setting_set() { printf '%s\n' "$*" >> "$EVENTS"; }
 ynh_config_add_systemd() { return 0; }
+ynh_config_add_nginx() { return 0; }
+install() {
+    local source="${@: -2:1}"
+    [ -f "$source" ] || { printf 'Missing provisioner source: %s\n' "$source" >&2; return 1; }
+}
+/usr/local/sbin/arcenal-assistance-provision() { return 0; }
 test() { if [ "$1" = -x ]; then return 0; else builtin test "$@"; fi; }
 ynh_permission_url() { return 0; }
 ynh_permission_update() { printf '%s\n' "$*" >> "$EVENTS"; }

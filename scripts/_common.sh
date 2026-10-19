@@ -10,6 +10,7 @@ hermes_build() {
     # intégrés aux modules : leur base doit être fixée avant compilation.
     python3 ../conf/prepare_web_base.py --source "$install_dir" --path "$path"
     python3 ../conf/prepare_arcenal.py --source "$install_dir"
+    python3 ../conf/prepare_assistance.py --source "$install_dir"
     chown -R "$app:$app" "$install_dir"
     local bootstrap="$install_dir/.bootstrap-python/bin/python3"
     test -x "$bootstrap" || ynh_die "Le Python d'amorçage Hermes est absent."
@@ -34,12 +35,13 @@ hermes_build() {
     ynh_exec_as_app "$bootstrap" "$install_dir/scripts/write_install_stamp.py" \
         --output "$install_dir/install-stamp.json" --update-mechanism external \
         --commit d923a5eb487a17c0a68801bba9ef0f56c81040a8 --source yunohost \
-        --base-version "0.22.2" --distance 0 --display-version "0.22.2~ynh2"
+        --base-version "0.22.2" --distance 0 --display-version "0.22.2~ynh3"
     chown -R "root:$app" "$install_dir"
     chmod -R u=rwX,g=rX,o= "$install_dir"
 }
 
 hermes_configure() {
+    hermes_assistance_configure
     install -o root -g "$app" -m 0640 ../conf/configure.py "$install_dir/yunohost_configure.py"
     ynh_exec_as_app env HOME="$data_dir" HERMES_HOME="$data_dir" \
         PYTHONPATH="$install_dir" "$hermes_python" "$install_dir/yunohost_configure.py"
@@ -55,6 +57,20 @@ hermes_configure() {
     if [ "$current_label" = "Hermes Agent" ]; then
         yunohost app change-label "$app" "ARCenal Agent"
     fi
+}
+
+hermes_assistance_configure() {
+    if ! assistance_proxy_key=$(ynh_app_setting_get --key=assistance_proxy_key); then
+        # The setting is absent on the first upgrade from a pre-assistance package.
+        assistance_proxy_key=""
+    fi
+    if [ -z "$assistance_proxy_key" ]; then
+        assistance_proxy_key=$(python3 -c 'import secrets; print(secrets.token_urlsafe(48))')
+        ynh_app_setting_set --key=assistance_proxy_key --value="$assistance_proxy_key"
+    fi
+    local package_dir="${YNH_APP_BASEDIR:-$(dirname "${BASH_SOURCE[0]}")/..}"
+    install -o root -g root -m 0755 "$package_dir/conf/arcenal-assistance-provision" /usr/local/sbin/arcenal-assistance-provision
+    /usr/local/sbin/arcenal-assistance-provision
 }
 
 hermes_admin_permission() {

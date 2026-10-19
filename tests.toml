@@ -4,6 +4,8 @@ test_format = 1.0
     args.path = "/arcenal"
     test_upgrade_from.ynh21.name = "Version ARC avec superviseur"
     test_upgrade_from.ynh21.url = "https://github.com/arcenal-coder/arcenal_ynh/tree/f79754bd4ddddacfdbc2aa1e74e70ebde717e124"
+    test_upgrade_from.ynh2.name = "Hermes natif 0.22.2~ynh2"
+    test_upgrade_from.ynh2.url = "https://github.com/arcenal-coder/arcenal_ynh/tree/8324eed0ba61bdd2f4f2e565e77f4836f14deca8"
 
 [root]
     args.path = "/"

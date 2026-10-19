@@ -22,3 +22,4 @@ ynh_backup "$install_dir"
 # Les données sont déjà embarquées, figées, dans l'instantané du code.
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
 ynh_backup "/etc/systemd/system/$app.service"
+ynh_backup /etc/arcenal-assistance/agent.json --not_mandatory

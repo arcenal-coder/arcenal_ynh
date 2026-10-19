@@ -1,0 +1,77 @@
+#!/usr/bin/python3
+"""Prepare co-hosted assistance using root-owned YunoHost application settings."""
+import fcntl
+import grp
+import json
+import os
+import secrets
+import tempfile
+from pathlib import Path
+from urllib.parse import urlsplit
+
+import yaml
+
+
+def read_json(path):
+    try:
+        return json.loads(path.read_text())
+    except (OSError, ValueError):
+        return {}
+
+
+def atomic_json(path, value, group):
+    fd, temporary = tempfile.mkstemp(dir=path.parent, prefix=".assistance-")
+    try:
+        with os.fdopen(fd, "w") as handle:
+            json.dump(value, handle)
+            handle.flush()
+            os.fsync(handle.fileno())
+            os.fchown(handle.fileno(), 0, grp.getgrnam(group).gr_gid)
+            os.fchmod(handle.fileno(), 0o640)
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def settings(root, app):
+    path = root / app / "settings.yml"
+    if not path.exists():
+        return None
+    if path.is_symlink() or path.stat().st_uid != 0 or path.stat().st_mode & 0o022:
+        raise ValueError("Paramètres YunoHost non fiables.")
+    return yaml.safe_load(path.read_text())
+
+
+def public_url(config):
+    value = "https://" + config["domain"] + "/" + config.get("path", "/").strip("/")
+    parsed = urlsplit(value)
+    if (not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment
+            or any(c in value for c in "\\%\r\n\t ")):
+        raise ValueError("Adresse YunoHost invalide.")
+    return value.rstrip("/")
+
+
+def provision(root=Path("/etc/yunohost/apps"), directory=Path("/etc/arcenal-assistance")):
+    agent, matos = settings(root, "arcenal"), settings(root, "arcenal-matos")
+    if not agent or not agent.get("assistance_proxy_key"):
+        return
+    directory.mkdir(mode=0o755, exist_ok=True)
+    with (directory / ".lock").open("w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        registry_path = directory / "agent.json"
+        registry = {"applications": {}, "proxy_key": agent["assistance_proxy_key"], "state_dir": str(Path(agent["data_dir"]) / "assistance")}
+        if matos:
+            previous = read_json(registry_path).get("applications", {}).get("arcenal-matos", {})
+            key = previous.get("key") or secrets.token_urlsafe(48)
+            agent_url, matos_url = public_url(agent), public_url(matos)
+            registry["applications"]["arcenal-matos"] = {"key": key, "verify_url": matos_url + "/integration/assistance/verify/"}
+            atomic_json(Path(matos["install_dir"]) / ".assistance.json", {"application": "arcenal-matos", "key": key,
+                "service_url": agent_url + "/assistance/service", "sso_url": agent_url + "/assistance/"}, "arcenal-matos")
+        atomic_json(registry_path, registry, "arcenal")
+
+
+if __name__ == "__main__":
+    if os.geteuid() != 0:
+        raise SystemExit("Exécution réservée au cycle de vie YunoHost.")
+    provision()

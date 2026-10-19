@@ -1,4 +1,25 @@
-# Rapport de contrôle — ARCenal Agent `0.22.2~ynh2`
+# Rapport de contrôle — ARCenal Agent `0.22.2~ynh3`
+
+## Assistance Matos — 2026-10-19
+
+- Portage autorisé sur la distribution native actuelle, base paquet8324eed ;
+  source Hermes et SHA256 inchangés. Aucun ancien broker/service réintroduit.
+- RÉUSSI : 41 tests Python du paquet, dont7 pour la liaison/provisionneur et
+  import du véritable dashboard natif préparé ;2 tests web historiques ignorés
+  localement faute de frontend construit dans cette nouvelle copie.
+- RÉUSSI : test inter-dépôts Matos↔store natif, droits revérifiés et rejeu bloqué,
+  transports HTTP remplacés seulement ; lint Python, compilation et syntaxe Bash.
+- Revue indépendante : défaut de chemin du provisionneur en restauration
+  identifié puis corrigé ; test de snapshots contrôle maintenant l’existence
+  réelle du fichier source au lieu de simuler aveuglément `install`.
+- Contrat et utilisation : `doc/ASSISTANCE_LINK_V1.md`. L’accueil vérifie le
+  contexte autorisé et ne lance pas de conversation IA.
+- GitHub CI prévu avec le runtime3.14.7 et les dépendances natives verrouillées.
+  Nouveau cycle YunoHost réel et serveur client NON_EXÉCUTÉS à ce stade.
+- Les preuves de build/frontend ci-dessous concernent le socle~ynh2, pas une
+  nouvelle exécution du frontend pour~ynh3.
+
+## Historique du socle `0.22.2~ynh2`
 
 ## Candidate
 

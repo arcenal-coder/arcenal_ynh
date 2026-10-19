@@ -7,7 +7,7 @@ name = "ARCenal Agent"
 description."en" = "Self-hosted AI assistant based on Hermes with a native YunoHost dashboard"
 description."fr" = "Assistant IA basé sur Hermes avec dashboard natif YunoHost et thème Gratitude"
 
-version = "0.22.2~ynh2"
+version = "0.22.2~ynh3"
 
 maintainers = ["compteonyx"]
 
@@ -54,6 +54,16 @@ ram.runtime = "1G"
     main.allowed = "admins"
     main.auth_header = true
     main.protected = true
+    assistance.url = "/assistance/"
+    assistance.allowed = "all_users"
+    assistance.auth_header = true
+    assistance.show_tile = false
+    assistance.protected = true
+    assistance_service.url = "/assistance/service"
+    assistance_service.allowed = "visitors"
+    assistance_service.auth_header = false
+    assistance_service.show_tile = false
+    assistance_service.protected = true
 
     [resources.ports]
     main.default = 9119

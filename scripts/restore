@@ -4,6 +4,7 @@ source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 ynh_abort_if_errors
 ynh_restore "$install_dir"
+ynh_restore /etc/arcenal-assistance/agent.json --not_mandatory
 # L'instantané cohérent prime sur la copie tardive du dossier vivant.
 if [ -f "$install_dir/.ynh-data-snapshot.tar" ]; then
     restored=$(mktemp -d "${data_dir}.restore.XXXXXX")
@@ -27,6 +28,8 @@ test -x "$hermes_node" || ynh_die "Le runtime Node YunoHost restauré est absent
 ynh_app_setting_set --key=hermes_node --value="$hermes_node"
 ynh_config_add_systemd --template=arcenal.service
 hermes_admin_permission
+hermes_assistance_configure
+ynh_config_add_nginx
 systemctl enable "$app.service" --quiet
 yunohost service add "$app" --description="ARCenal Agent" --log="$data_dir/logs/gui.log"
 hermes_start
