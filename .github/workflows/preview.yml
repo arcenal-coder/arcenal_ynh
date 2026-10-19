@@ -2,6 +2,7 @@ name: Verify native assistance preview
 on:
   push:
     branches: [preview]
+    tags: ['v0.22.2-ynh*-preview']
   workflow_dispatch:
 permissions:
   contents: read
