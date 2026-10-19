@@ -5,7 +5,7 @@ import json
 import secrets
 import sqlite3
 import time
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from pathlib import Path
 from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 
@@ -45,7 +45,7 @@ def database():
     base = Path(configuration()["state_dir"])
     base.mkdir(mode=0o700, parents=True, exist_ok=True)
     path = base / "assistance.sqlite3"
-    with sqlite3.connect(path, timeout=5) as db:
+    with closing(sqlite3.connect(path, timeout=5)) as db, db:
         path.chmod(0o600)
         db.row_factory = sqlite3.Row
         db.execute("CREATE TABLE IF NOT EXISTS pairs (id TEXT PRIMARY KEY, application TEXT, state TEXT, expires REAL)")

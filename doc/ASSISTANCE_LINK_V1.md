@@ -1,4 +1,4 @@
-# ARCenal Agent 0.22.2~ynh3 — liaison Matos en lecture seule
+# ARCenal Agent 0.22.2~ynh4 — liaison Matos en lecture seule
 
 Le client autorise le portage depuis l’ancien prototype puis la publication
 des deux paquets GitHub en preview. Base : `8324eed`, Hermes stable v0.22.2,

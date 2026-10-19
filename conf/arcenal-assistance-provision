@@ -9,8 +9,6 @@ import tempfile
 from pathlib import Path
 from urllib.parse import urlsplit
 
-import yaml
-
 
 def read_json(path):
     try:
@@ -35,6 +33,9 @@ def atomic_json(path, value, group):
 
 
 def settings(root, app):
+    # This helper runs with YunoHost's system Python, not the Hermes runtime.
+    import yaml
+
     path = root / app / "settings.yml"
     if not path.exists():
         return None

@@ -35,7 +35,7 @@ hermes_build() {
     ynh_exec_as_app "$bootstrap" "$install_dir/scripts/write_install_stamp.py" \
         --output "$install_dir/install-stamp.json" --update-mechanism external \
         --commit d923a5eb487a17c0a68801bba9ef0f56c81040a8 --source yunohost \
-        --base-version "0.22.2" --distance 0 --display-version "0.22.2~ynh3"
+        --base-version "0.22.2" --distance 0 --display-version "0.22.2~ynh4"
     chown -R "root:$app" "$install_dir"
     chmod -R u=rwX,g=rX,o= "$install_dir"
 }

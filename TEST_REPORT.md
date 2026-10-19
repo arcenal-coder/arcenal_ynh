@@ -1,6 +1,12 @@
-# Rapport de contrôle — ARCenal Agent `0.22.2~ynh3`
+# Rapport de contrôle — ARCenal Agent `0.22.2~ynh4`
 
 ## Assistance Matos — 2026-10-19
+
+- La première CI3.14 a prouvé le montage natif et les contrôles d’accès mais
+  échoué au chargement d’un test de provisionneur : PyYAML appartient au Python
+  système YunoHost, pas au runtime Hermes. Import différé au parseur système,
+  fermeture explicite des connexions SQLite ; nouvelle candidate~ynh4, ancien
+  tag~ynh3 conservé sans promotion ni remplacement.
 
 - Portage autorisé sur la distribution native actuelle, base paquet8324eed ;
   source Hermes et SHA256 inchangés. Aucun ancien broker/service réintroduit.
