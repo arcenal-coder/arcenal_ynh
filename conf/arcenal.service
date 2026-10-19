@@ -1,6 +1,7 @@
 [Unit]
 Description=ARCenal Agent — dashboard natif YunoHost
 After=network.target
+Wants=arcenal-connectors.service
 
 [Service]
 Type=simple

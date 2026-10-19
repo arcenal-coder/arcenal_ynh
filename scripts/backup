@@ -4,6 +4,7 @@ source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 set -e
 was_running=false
+hermes_connectors_stop
 if systemctl is-active --quiet "$app.service"; then
     was_running=true
     ynh_systemctl --service="$app" --action=stop
@@ -16,6 +17,7 @@ snapshot=$(mktemp "$install_dir/.ynh-data-snapshot.XXXXXX")
 tar --create --file="$snapshot" --directory="$data_dir" .
 chmod 600 "$snapshot"
 mv "$snapshot" "$install_dir/.ynh-data-snapshot.tar"
+hermes_connectors_backup
 # Le rollback doit retrouver le code et l'environnement Python précédents,
 # sans téléchargement ni reconstruction pendant la restauration.
 ynh_backup "$install_dir"

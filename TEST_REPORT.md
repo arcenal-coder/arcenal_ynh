@@ -1,4 +1,4 @@
-# Rapport de contrôle — ARCenal Agent `0.22.2~ynh2`
+# Rapport de contrôle — ARCenal Agent `0.22.2~ynh5`
 
 ## Candidate
 
@@ -6,7 +6,12 @@
 - SHA-256 téléchargé et vérifié :
   `616649f8ac7e3bb186999d000d77511e733b3930bd2b5921be4a85673320ef8b`.
 - Identifiant YunoHost conservé : `arcenal`.
-- État : candidate locale de marque ARCenal Agent ; publication en attente.
+- État : publication Preview autorisée par le client ; aucune opération serveur.
+- La candidate Connecteurs initialement nommée `~ynh3` devient `~ynh5` pour
+  préserver la publication concurrente du lien d'assistance Matos en `~ynh4`.
+- Base publiée : `0.22.2~ynh2`, paquet `8324eed0ba61bdd2f4f2e565e77f4836f14deca8`.
+- Architecture, installation client, limites, recette et rollback : `doc/CONNECTEURS.md`.
+- Complément actuel : administration native YunoHost, `doc/YUNOHOST_NATIF.md`.
 - Nouveau lot de marque et politique de mises à jour : `doc/ARCENAL_BRANDING.md`.
 - Preuves actuelles et compatibilité : `doc/UPDATE_V0.22.2.md`.
 - Les incidents `~ynh63` à `~ynh69` décrits ci-dessous sont HISTORIQUES et
@@ -24,7 +29,7 @@
 | Environnement Python PM | RÉUSSI | Construction isolée avec dépendances verrouillées |
 | Dashboard web | RÉUSSI | TypeScript et build de la source Hermes |
 | TUI embarqué | RÉUSSI | Build amont nécessaire au chat |
-| Tests du paquet | RÉUSSI | 36 tests Python sans omission + 1 test Node ; libellés YunoHost, bannières CLI/TUI, propriété externe et Chrome réel |
+| Tests du paquet | RÉUSSI, portée partielle | 92 tests Python collectés : 90 réussis, 2 tests navigateur ignorés dans l'environnement actuel ; 2 tests Node réussis |
 | Build avec base `/arcenal/` | RÉUSSI | Compilateur Hermes réel, TypeScript et Vite sur une copie de la source épinglée |
 | Préchargement Chat sous SSO strict | RÉUSSI | Échec reproduit avant correction, interface et flux PTY après ; aucun asset demandé hors `/arcenal` |
 | Contraste AA des boutons principaux | RÉUSSI | Ratio texte/fond ≥ 4,5 pour les deux palettes |
@@ -36,6 +41,62 @@ corrigés et vérifiés localement : lecture du champ `name` pour le libellé
 YunoHost et `banner_logo` natif pour les grandes bannières CLI/TUI.
 Les derniers changements n'affectent pas le frontend compilé ; le build adapté
 déjà validé est utilisé par le test Chrome rejoué avec les 36 tests Python.
+
+## Lot Connecteurs `~ynh3` — résultats ACTUELS
+
+| Contrôle | Résultat | Portée |
+| --- | --- | --- |
+| Lint et types | RÉUSSI | Ruff sur composants/tests, ty sur autorité et configuration |
+| Console précompilée | RÉUSSI | esbuild avec dépendances verrouillées existantes ; artefacts et licences livrés dans le paquet ; aucun build sous l'UID Hermes sur la cible |
+| Menu natif | RÉUSSI HISTORIQUE | Chrome sur le vrai dashboard avant le complément natif ; recette navigateur ignorée dans l'environnement actuel |
+| Console centrale | RÉUSSI HISTORIQUE | Bundle React/API locale et CSP vérifiés avant le complément natif ; recette navigateur ignorée dans l'environnement actuel |
+| Plugins Hermes | RÉUSSI | Découverte et dispatch réels des trois plugins en processus isolé, arguments forgés refusés, hooks de clôture natifs |
+| Coffre et secrets | RÉUSSI | Chiffrement par profil, permissions, non-révélation API/audit, URL sans credentials, maintien des fichiers existants |
+| Validation humaine | RÉUSSI | Unique, session, limitée, expirée, refusée, toujours-valider et YunoHost sensible |
+| Concurrence | RÉUSSI | Double validation sans double exécution ; révocation sans attendre le réseau ; résultat de test ne rétablissant pas un secret révoqué |
+| Refus sans audit | RÉUSSI | Audit altéré/indisponible bloque toute exécution |
+| Isolation | RÉUSSI | Politique UID/profil, headers forgés sans effet, deux clients sur un UID refusés, absence d'accès croisé aux demandes |
+| Réseau | RÉUSSI | SSRF refusée avant connexion ; IP épinglée et nom de certificat conservé ; applications simulées |
+| Restauration privée | RÉUSSI | Archive validée avant effet, traversée refusée, copie précédente conservée, UID et délégations anciens invalidés |
+| Échec de sauvegarde privée | RÉUSSI | Fichier temporaire privé avant écriture ; ancienne archive intacte et temporaire supprimé si tar échoue |
+| Syntaxe et manifeste | RÉUSSI | Bash, JS source/bundle, TOML et diff Git |
+| Revue de sécurité distincte | RÉALISÉE | Auto-revue locale ; pas de revue indépendante revendiquée |
+| Installation/upgrade YunoHost `~ynh3` | NON_EXÉCUTÉ | Instance jetable requise |
+| SSOwat/TLS/port et authentification Unix Linux réelle | NON_EXÉCUTÉ | Les tests locaux ne constituent pas une preuve de déploiement |
+| Droits sudo et helper YunoHost réels | NON_EXÉCUTÉ | Les tests exécutent le constructeur de commandes, pas des opérations privilégiées |
+| API Dolibarr/Nextcloud réelles | NON_EXÉCUTÉ | Versions, URLs et comptes techniques de recette à fournir/configurer |
+| Backup/restore/rollback YunoHost complet | NON_EXÉCUTÉ | Recette détaillée dans `doc/CONNECTEURS.md` |
+
+La nouvelle autorité utilise du code root séparé et Python système isolé, avec
+la cryptographie Debian ; aucun code/dépendance construit par Hermes n'est
+chargé avec ses privilèges. Le runtime Hermes et son Python épinglé sont inchangés.
+La compatibilité réelle de ce nouveau service sur Bookworm reste à qualifier.
+L'extraction privée n'utilise pas `tarfile.extractall(filter=...)`, absent de son
+Python initial ; elle refuse les liens et chemins étrangers avant écriture.
+
+Les adaptations TLS/SSO doivent être vérifiées avant toute publication. Le port
+secondaire doit également être accessible à travers le réseau amont du serveur.
+L'API centrale n'expose aucune route d'approbation sur l'origine ou la socket Hermes.
+
+## Complément actuel — YunoHost natif
+
+- Vérification du vrai résolveur Hermes et des schémas transmis au modèle :
+  `arcenal_yunohost` présent par défaut avec un nouveau plugin, désactivation
+  explicite conservée, dispatch réussi par `handle_function_call`.
+- Instructions constantes enregistrées par `register_system_prompt_section`,
+  figées à l'ouverture d'une nouvelle session ; aucun changement de contexte passé.
+- Initialisation locale sans secret du connecteur serveur et test en lecture
+  au premier usage ; un connecteur désactivé n'est pas réactivé.
+- Inventaire minimal via les commandes YunoHost officielles, données brutes et
+  secrets non propagés ; nouveaux contrôles start/stop et noms de services avec points.
+- Mutations toujours à validation unique, protection de l'accès au plan de contrôle,
+  suivi `action.status` sans deuxième exécution. Après interruption du service,
+  une réservation inachevée devient `unknown`, jamais rejouée.
+- Dernier contrôle : 90 tests Python réussis, 2 tests Chrome ignorés (prérequis
+  navigateur/build local non disponibles pour ces recettes), 2 tests Node réussis,
+  Ruff, ty, Bash et diff sans erreur. Runtime de contrôle isolé reconstruit par PM.
+- NON_EXÉCUTÉ : commandes privilégiées sur YunoHost réel et conversation avec un
+  modèle réel. Ces tests prouvent la découverte et le routage, pas un déploiement.
 
 Les tests de snapshots exécutent les scripts et `tar` sur un dossier temporaire
 avec SQLite. Les appels YunoHost et systemd sont simulés. Le smoke test démarre

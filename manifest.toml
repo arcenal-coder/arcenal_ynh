@@ -7,7 +7,7 @@ name = "ARCenal Agent"
 description."en" = "Self-hosted AI assistant based on Hermes with a native YunoHost dashboard"
 description."fr" = "Assistant IA basé sur Hermes avec dashboard natif YunoHost et thème Gratitude"
 
-version = "0.22.2~ynh2"
+version = "0.22.2~ynh5"
 
 maintainers = ["compteonyx"]
 
@@ -57,9 +57,11 @@ ram.runtime = "1G"
 
     [resources.ports]
     main.default = 9119
+    connectors.default = 9443
+    connectors.exposed = "TCP"
 
     [resources.apt]
-    packages = ["python3", "python3-venv", "ripgrep", "ffmpeg", "git", "curl", "ca-certificates"]
+    packages = ["python3", "python3-venv", "python3-cryptography", "ripgrep", "ffmpeg", "git", "curl", "ca-certificates", "sudo"]
 
     [resources.nodejs]
     version = "22.23.1"

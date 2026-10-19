@@ -1,5 +1,9 @@
 # Administration — ARCenal Agent sur YunoHost
 
+Candidate Connecteurs `0.22.2~ynh5` : voir [CONNECTEURS.md](CONNECTEURS.md)
+pour la console administrateur isolée, le coffre, les comptes techniques et la
+configuration des clients. Le cœur Hermes n'est pas modifié par cette extension.
+
 ## Architecture
 
 - Identifiant de l'application : `arcenal`, conservé pour l'upgrade en place.

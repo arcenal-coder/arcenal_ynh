@@ -1,0 +1,24 @@
+[Unit]
+Description=ARCenal Agent — autorité centrale des connecteurs
+After=network.target __APP__.service
+BindsTo=__APP__.service
+
+[Service]
+Type=simple
+User=arcenal-connectors
+Group=arcenal-connectors
+SupplementaryGroups=www-data __APP__
+WorkingDirectory=/usr/local/lib/arcenal-connectors
+ExecStart=/usr/bin/python3 -I -B /usr/local/lib/arcenal-connectors/run.py server --config /etc/arcenal-connectors/policy.json
+RuntimeDirectory=arcenal-connectors
+RuntimeDirectoryMode=0755
+UMask=0077
+Restart=on-failure
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/etc/yunohost
+# Le helper sudo à opérations fermées est réservé à CET utilisateur.
+# Le service Hermes principal conserve NoNewPrivileges=true et aucun sudo.
+
+[Install]
+WantedBy=multi-user.target

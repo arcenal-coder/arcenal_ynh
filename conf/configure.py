@@ -94,6 +94,15 @@ def configure() -> None:
     initialized = home / ".yunohost-gratitude-initialized"
     branded = home / ".yunohost-arcenal-initialized"
     changed = False
+    connector_marker = home / ".arcenal-connectors-initialized"
+    if (home / ".arcenal-connectors-installed").exists() and not connector_marker.exists():
+        plugins = config.setdefault("plugins", {})
+        enabled = plugins.setdefault("enabled", [])
+        disabled = plugins.get("disabled", [])
+        for name in ("arcenal-connectors", "arcenal-dolibarr", "arcenal-nextcloud", "arcenal-yunohost"):
+            if name not in enabled and name not in disabled:
+                enabled.append(name)
+                changed = True
     # PM peut créer config.yaml avant ce helper. Son thème générique ne doit
     # pas empêcher l'habillage demandé ; une migration unique préserve ensuite
     # tous les choix de l'utilisateur, y compris un retour à Hermes Teal.
@@ -115,6 +124,9 @@ def configure() -> None:
     if not branded.exists():
         branded.write_text("arcenal-branding-v1\n", encoding="utf-8")
         branded.chmod(0o600)
+    if (home / ".arcenal-connectors-installed").exists() and not connector_marker.exists():
+        connector_marker.write_text("central-connectors-v1\n", encoding="utf-8")
+        connector_marker.chmod(0o600)
     (home / "config.yaml").chmod(0o600)
     for name in (".env", "auth.json"):
         secret_file = home / name

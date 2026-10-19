@@ -2,6 +2,14 @@
 
 source _common.sh
 source /usr/share/yunohost/helpers
+hermes_connectors_stop
+if hermes_connectors_enabled; then
+    ynh_config_remove_systemd "$app-connectors"
+    yunohost service remove "$app-connectors"
+    rm -f /etc/sudoers.d/arcenal-connectors /usr/local/libexec/arcenal-yunohost
+    rm -f "/etc/nginx/conf.d/$app-connectors.conf"
+    # Le coffre et son identité sont conservés pour récupération, jamais purgés implicitement.
+fi
 hermes_stop_legacy_services
 
 # Arrête et désenregistre le service lorsqu'il a été créé. Les ressources v2

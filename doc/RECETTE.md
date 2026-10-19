@@ -1,6 +1,8 @@
 # Recette ARCenal Agent pour YunoHost
 
-Candidate locale à publier en Preview : `0.22.2~ynh2`. Identifiant conservé : `arcenal`.
+Candidate Preview : `0.22.2~ynh5`. Identifiant conservé : `arcenal`.
+Publication autorisée par le client ; déploiement non exécuté. Recette Connecteurs,
+configuration client et rollback : [CONNECTEURS.md](CONNECTEURS.md).
 
 ## Source exacte
 

@@ -74,6 +74,24 @@ class ConfigurationTests(unittest.TestCase):
                 skin = load_skin("arcenal")
                 self.assertEqual(skin.branding["agent_name"], "ARCenal Agent")
 
+    def test_connector_activation_preserves_disabled_plugins_and_later_choices(self):
+        from hermes_cli.config import load_config
+
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            (home / ".arcenal-connectors-installed").touch()
+            (home / "config.yaml").write_text("plugins:\n  disabled: [arcenal-dolibarr]\n  enabled: [existing-plugin]\n")
+            with patch.dict(os.environ, {"HERMES_HOME": directory}):
+                configuration.configure()
+                plugins = load_config()["plugins"]
+                self.assertIn("existing-plugin", plugins["enabled"])
+                self.assertIn("arcenal-connectors", plugins["enabled"])
+                self.assertNotIn("arcenal-dolibarr", plugins["enabled"])
+                original = "# Choix ultérieur conservé\nplugins:\n  enabled: [existing-plugin]\n"
+                (home / "config.yaml").write_text(original)
+                configuration.configure()
+            self.assertEqual((home / "config.yaml").read_text(), original)
+
     def test_wide_cli_banner_renders_arcenal_logo(self):
         from hermes_cli import banner
         from hermes_cli.skin_engine import load_skin

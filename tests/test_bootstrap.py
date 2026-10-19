@@ -58,7 +58,7 @@ class BootstrapTests(unittest.TestCase):
         env = dict(os.environ, app="fixture", path="/arcenal", install_dir=str(home / "app"),
                    data_dir=str(home / "data"), COMMON=str(PACKAGE / "scripts/_common.sh"),
                    FIXTURE_PYTHON=str(fixture), EVENTS=str(home / "events"), MISSING=missing)
-        return subprocess.run(["bash", "-c", HARNESS], env=env, text=True, capture_output=True)
+        return subprocess.run(["bash", "-c", HARNESS], env=env, cwd=PACKAGE / "scripts", text=True, capture_output=True)
 
     def test_pm_uses_pinned_bootstrap_instead_of_host_python(self):
         with tempfile.TemporaryDirectory(prefix="Hermes bootstrap ") as directory:

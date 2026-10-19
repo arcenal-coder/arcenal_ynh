@@ -27,6 +27,14 @@ test -x "$hermes_node" || ynh_die "Le runtime Node YunoHost restauré est absent
 ynh_app_setting_set --key=hermes_node --value="$hermes_node"
 ynh_config_add_systemd --template=arcenal.service
 hermes_admin_permission
+if hermes_connectors_enabled; then
+    hermes_connectors_stop
+    hermes_connectors_identity
+    ynh_restore /usr/local/lib/arcenal-connectors
+    test -f "$install_dir/.ynh-connectors-snapshot.tar" || ynh_die "Instantané privé des connecteurs absent."
+    /usr/bin/python3 -I -B /usr/local/lib/arcenal-connectors/run.py backup --restore "$install_dir/.ynh-connectors-snapshot.tar"
+    hermes_connectors_configure
+fi
 systemctl enable "$app.service" --quiet
 yunohost service add "$app" --description="ARCenal Agent" --log="$data_dir/logs/gui.log"
 hermes_start

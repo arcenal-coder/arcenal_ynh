@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/_connectors.sh"
+
 # Le gestionnaire PM amont vérifie ses outils épinglés : aucun curl | sh.
 hermes_build() {
     ynh_setup_source --dest_dir="$install_dir" --full_replace=1
@@ -10,6 +12,8 @@ hermes_build() {
     # intégrés aux modules : leur base doit être fixée avant compilation.
     python3 ../conf/prepare_web_base.py --source "$install_dir" --path "$path"
     python3 ../conf/prepare_arcenal.py --source "$install_dir"
+    cp -R ../connectors/arcenal_connectors "$install_dir/arcenal_connectors"
+    cp -R ../connectors/hermes-plugins "$install_dir/.arcenal-plugins"
     chown -R "$app:$app" "$install_dir"
     local bootstrap="$install_dir/.bootstrap-python/bin/python3"
     test -x "$bootstrap" || ynh_die "Le Python d'amorçage Hermes est absent."
@@ -34,12 +38,14 @@ hermes_build() {
     ynh_exec_as_app "$bootstrap" "$install_dir/scripts/write_install_stamp.py" \
         --output "$install_dir/install-stamp.json" --update-mechanism external \
         --commit d923a5eb487a17c0a68801bba9ef0f56c81040a8 --source yunohost \
-        --base-version "0.22.2" --distance 0 --display-version "0.22.2~ynh2"
+        --base-version "0.22.2" --distance 0 --display-version "0.22.2~ynh5"
     chown -R "root:$app" "$install_dir"
     chmod -R u=rwX,g=rX,o= "$install_dir"
 }
 
 hermes_configure() {
+    hermes_connectors_install_layer
+    hermes_connectors_configure
     install -o root -g "$app" -m 0640 ../conf/configure.py "$install_dir/yunohost_configure.py"
     ynh_exec_as_app env HOME="$data_dir" HERMES_HOME="$data_dir" \
         PYTHONPATH="$install_dir" "$hermes_python" "$install_dir/yunohost_configure.py"
@@ -113,9 +119,12 @@ hermes_start() {
     local attempt
     for attempt in {1..60}; do
         if curl --fail --silent "http://127.0.0.1:$port/" >/dev/null; then
-            return 0
+            if ! hermes_connectors_enabled || curl --fail --silent --unix-socket /run/arcenal-connectors/admin.sock \
+                http://localhost/v1/health >/dev/null; then
+                return 0
+            fi
         fi
         sleep 2
     done
-    ynh_die "Le dashboard Hermes n'est pas prêt après 120 secondes."
+    ynh_die "Le dashboard ou l'autorité des connecteurs n'est pas prêt après 120 secondes."
 }

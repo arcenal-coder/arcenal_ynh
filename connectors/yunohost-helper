@@ -1,0 +1,79 @@
+#!/usr/bin/python3 -I
+"""Helper privilégié spécifique YunoHost. Aucun shell, URL ou argv libre."""
+
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+
+def build_command(request, policy):
+    if not isinstance(request, dict) or set(request) != {"profile", "operation", "target", "request_id"}:
+        raise ValueError("refus")
+    profile, operation, target, request_id = (request[k] for k in ("profile", "operation", "target", "request_id"))
+    if not all(isinstance(v, str) for v in (profile, operation, target, request_id)):
+        raise ValueError("refus")
+    if not re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", profile) or not re.fullmatch(r"[a-z][a-z0-9_.@-]{0,79}", target):
+        raise ValueError("refus")
+    if not re.fullmatch(r"[a-f0-9]{32}", request_id):
+        raise ValueError("refus")
+    allowed = policy.get("yunohost_targets", {}).get(profile, {})
+    if target not in allowed.get(operation, []):
+        raise ValueError("refus")
+    if operation == "server.inventory":
+        if target != "server":
+            raise ValueError("refus")
+        return []  # Trois lectures fermées, exécutées par le collecteur central.
+    if operation == "service.status":
+        return ["/usr/bin/systemctl", "show", target + ".service", "--property=ActiveState", "--value"]
+    if operation in ("service.start", "service.stop", "service.restart"):
+        if target in ("arcenal", "arcenal-connectors"):
+            raise ValueError("auto-interruption interdite")
+        if target.endswith(".service") or operation == "service.stop" and target in (
+                "nginx", "slapd", "nslcd", "ssh", "sshd", "yunohost-api", "yunohost-portal-api"):
+            raise ValueError("plan de controle protege")
+        return ["/usr/bin/yunohost", "service", operation.split(".")[1], target]
+    if operation == "backup.create":
+        if target == "arcenal" or not re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", target):
+            raise ValueError("auto-interruption interdite")
+        return ["/usr/bin/yunohost", "backup", "create", "--apps", target, "--name", "arcenal-" + request_id]
+    raise ValueError("refus")
+
+
+def main():
+    try:
+        if os.getuid() != 0 or os.environ.get("SUDO_USER") != "arcenal-connectors":
+            raise ValueError("refus")
+        content = sys.stdin.buffer.read(4097)
+        if len(content) > 4096:
+            raise ValueError("refus")
+        request = json.loads(content)
+        policy = json.loads(Path("/etc/arcenal-connectors/policy.json").read_text())
+        command = build_command(request, policy)
+        if request["operation"] == "server.inventory":
+            sys.path.insert(0, "/usr/local/lib/arcenal-connectors")
+            from arcenal_connectors.inventory import collect, filtered
+            allowed = policy.get("yunohost_inventory", {}).get(request["profile"], {})
+            print(json.dumps({"ok": True, "inventory": filtered(collect(), allowed)}))
+            return 0
+        status = request["operation"] == "service.status"
+        result = subprocess.run(command, cwd="/", stdin=subprocess.DEVNULL,
+                                stdout=subprocess.PIPE if status else subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL, text=True, timeout=300,
+                                env={"PATH": "/usr/sbin:/usr/bin:/sbin:/bin", "LANG": "C.UTF-8"})
+        if result.returncode:
+            raise ValueError("refus")
+        state = result.stdout.strip() if status else "termine"
+        if state not in ("active", "inactive", "failed", "activating", "deactivating", "termine"):
+            raise ValueError("refus")
+        print(json.dumps({"ok": True, "state": state}))
+        return 0
+    except Exception:
+        print('{"error":"operation_yunohost_refusee"}')
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

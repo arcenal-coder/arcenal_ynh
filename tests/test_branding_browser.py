@@ -53,8 +53,19 @@ class BrandingBrowserTests(unittest.TestCase):
                     self.send_error(502)
 
         with tempfile.TemporaryDirectory() as directory, tempfile.TemporaryFile() as logs:
+            import importlib.util
+            package = Path(__file__).parents[1]
+            sys.path.insert(0, str(package / "connectors"))
+            from arcenal_connectors.provision import install_plugins
+            install_plugins(package / "connectors/hermes-plugins", Path(directory), "https://server.example.test:9443")
+            spec = importlib.util.spec_from_file_location("browser_configuration", package / "conf/configure.py")
+            configuration = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(configuration)
+            from unittest.mock import patch
+            with patch.dict(os.environ, {"HERMES_HOME": directory}):
+                configuration.configure()
             env = {"PATH": os.environ.get("PATH", ""), "HOME": directory,
-                   "HERMES_HOME": directory, "PYTHONPATH": str(source),
+                   "HERMES_HOME": directory, "PYTHONPATH": os.pathsep.join((str(source), str(package / "connectors"))),
                    "HERMES_RUNTIME_DIR": str(Path(directory) / "tools")}
             backend = subprocess.Popen(
                 [sys.executable, "-c", f"from hermes_cli.web_server import start_server; start_server(port={backend_port}, open_browser=False, isolated=True)"],
@@ -74,7 +85,7 @@ class BrandingBrowserTests(unittest.TestCase):
                         time.sleep(0.1)
                 else:
                     self.fail("Le backend local n'a pas démarré.")
-                for page in ("sessions", "system"):
+                for page in ("sessions", "system", "connecteurs"):
                     with self.subTest(page=page):
                         result = subprocess.run([
                             str(browser), "--headless=new", "--no-first-run", "--disable-background-networking",
@@ -83,6 +94,10 @@ class BrandingBrowserTests(unittest.TestCase):
                         ], text=True, stdout=subprocess.PIPE, stderr=logs, timeout=45)
                         self.assertEqual(result.returncode, 0)
                         dom = result.stdout
+                        self.assertIn("Connecteurs", dom)
+                        if page == "connecteurs":
+                            self.assertIn("Ouvrir la console sécurisée des connecteurs", dom)
+                            self.assertIn("https://server.example.test:9443/arcenal/", dom)
                         self.assertTrue("<title>ARCenal Agent" in dom, "Titre ARCenal absent.")
                         sidebar = re.search(r"<aside\b[^>]*>(.*?)</aside>", dom, re.S)
                         self.assertIsNotNone(sidebar, "Navigation non rendue.")

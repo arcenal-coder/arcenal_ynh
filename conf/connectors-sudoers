@@ -1,0 +1,2 @@
+Defaults:arcenal-connectors !setenv
+arcenal-connectors ALL=(root) NOPASSWD: /usr/local/libexec/arcenal-yunohost ""

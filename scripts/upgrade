@@ -3,6 +3,7 @@
 source _common.sh
 source /usr/share/yunohost/helpers
 ynh_abort_if_errors
+hermes_connectors_stop
 ynh_systemctl --service="$app" --action="stop"
 hermes_stop_legacy_services
 hermes_quiescent_data
@@ -14,6 +15,11 @@ transition=$(mktemp "$transition_dir/snapshot.XXXXXX")
 tar --create --file="$transition" "$install_dir" "$data_dir" \
     "/etc/nginx/conf.d/$domain.d/$app.conf" "/etc/systemd/system/$app.service"
 chmod 600 "$transition"
+if hermes_connectors_enabled; then
+    tar --append --file="$transition" /var/lib/arcenal-connectors /etc/arcenal-connectors \
+        /etc/sudoers.d/arcenal-connectors /usr/local/libexec/arcenal-yunohost \
+        "/etc/systemd/system/$app-connectors.service"
+fi
 for artifact in "/etc/sudoers.d/$app-supervisor" /usr/local/sbin/arcenal-supervisor-helper \
     /usr/local/sbin/arcenal-privileged-broker /usr/local/sbin/arcenal-nginx-reload \
     /usr/local/sbin/arcenal-control-socket-ready "/etc/systemd/system/${app}_control.service" \

@@ -1,0 +1,10 @@
+{
+  "name": "arcenal-connectors",
+  "label": "Connecteurs",
+  "description": "Administration sécurisée des connecteurs centraux ARCenal.",
+  "icon": "KeyRound",
+  "version": "1.0.0",
+  "tab": {"path": "/connecteurs", "position": "after:plugins"},
+  "entry": "dist/index.js",
+  "css": "dist/style.css"
+}
