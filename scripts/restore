@@ -4,6 +4,7 @@ source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 ynh_abort_if_errors
 ynh_restore "$install_dir"
+ynh_restore /etc/arcenal-assistance/agent.json --not_mandatory
 # L'instantané cohérent prime sur la copie tardive du dossier vivant.
 if [ -f "$install_dir/.ynh-data-snapshot.tar" ]; then
     restored=$(mktemp -d "${data_dir}.restore.XXXXXX")
@@ -35,6 +36,8 @@ if hermes_connectors_enabled; then
     /usr/bin/python3 -I -B /usr/local/lib/arcenal-connectors/run.py backup --restore "$install_dir/.ynh-connectors-snapshot.tar"
     hermes_connectors_configure
 fi
+hermes_assistance_configure
+ynh_config_add_nginx
 systemctl enable "$app.service" --quiet
 yunohost service add "$app" --description="ARCenal Agent" --log="$data_dir/logs/gui.log"
 hermes_start

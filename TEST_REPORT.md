@@ -1,5 +1,32 @@
 # Rapport de contrôle — ARCenal Agent `0.22.2~ynh5`
 
+## Assistance Matos — 2026-10-19
+
+- La première CI3.14 a prouvé le montage natif et les contrôles d’accès mais
+  échoué au chargement d’un test de provisionneur : PyYAML appartient au Python
+  système YunoHost, pas au runtime Hermes. Import différé au parseur système,
+  fermeture explicite des connexions SQLite ; nouvelle candidate~ynh4, ancien
+  tag~ynh3 conservé sans promotion ni remplacement.
+
+- Portage autorisé sur la distribution native actuelle, base paquet8324eed ;
+  source Hermes et SHA256 inchangés. Aucun ancien broker/service réintroduit.
+- RÉUSSI : 41 tests Python du paquet, dont7 pour la liaison/provisionneur et
+  import du véritable dashboard natif préparé ;2 tests web historiques ignorés
+  localement faute de frontend construit dans cette nouvelle copie.
+- RÉUSSI : test inter-dépôts Matos↔store natif, droits revérifiés et rejeu bloqué,
+  transports HTTP remplacés seulement ; lint Python, compilation et syntaxe Bash.
+- Revue indépendante : défaut de chemin du provisionneur en restauration
+  identifié puis corrigé ; test de snapshots contrôle maintenant l’existence
+  réelle du fichier source au lieu de simuler aveuglément `install`.
+- Contrat et utilisation : `doc/ASSISTANCE_LINK_V1.md`. L’accueil vérifie le
+  contexte autorisé et ne lance pas de conversation IA.
+- GitHub CI prévu avec le runtime3.14.7 et les dépendances natives verrouillées.
+  Nouveau cycle YunoHost réel et serveur client NON_EXÉCUTÉS à ce stade.
+- Les preuves de build/frontend ci-dessous concernent le socle~ynh2, pas une
+  nouvelle exécution du frontend pour~ynh3.
+
+## Base de la candidate intégrée
+
 ## Candidate
 
 - Source stable : Hermes `v0.22.2`, commit `d923a5eb487a17c0a68801bba9ef0f56c81040a8`.
@@ -9,7 +36,8 @@
 - État : publication Preview autorisée par le client ; aucune opération serveur.
 - La candidate Connecteurs initialement nommée `~ynh3` devient `~ynh5` pour
   préserver la publication concurrente du lien d'assistance Matos en `~ynh4`.
-- Base publiée : `0.22.2~ynh2`, paquet `8324eed0ba61bdd2f4f2e565e77f4836f14deca8`.
+- Base publiée intégrée : `0.22.2~ynh4`, paquet `f46106fba0f4e1c3c903fc523e58d6cc7fb9ba3a`.
+  Les travaux Connecteurs ont débuté sur le socle `~ynh2` `8324eed`.
 - Architecture, installation client, limites, recette et rollback : `doc/CONNECTEURS.md`.
 - Complément actuel : administration native YunoHost, `doc/YUNOHOST_NATIF.md`.
 - Nouveau lot de marque et politique de mises à jour : `doc/ARCENAL_BRANDING.md`.
@@ -29,7 +57,7 @@
 | Environnement Python PM | RÉUSSI | Construction isolée avec dépendances verrouillées |
 | Dashboard web | RÉUSSI | TypeScript et build de la source Hermes |
 | TUI embarqué | RÉUSSI | Build amont nécessaire au chat |
-| Tests du paquet | RÉUSSI, portée partielle | 92 tests Python collectés : 90 réussis, 2 tests navigateur ignorés dans l'environnement actuel ; 2 tests Node réussis |
+| Tests du paquet | RÉUSSI, portée partielle | 99 tests Python collectés : 97 réussis, 2 tests navigateur ignorés dans l'environnement actuel ; 2 tests Node réussis |
 | Build avec base `/arcenal/` | RÉUSSI | Compilateur Hermes réel, TypeScript et Vite sur une copie de la source épinglée |
 | Préchargement Chat sous SSO strict | RÉUSSI | Échec reproduit avant correction, interface et flux PTY après ; aucun asset demandé hors `/arcenal` |
 | Contraste AA des boutons principaux | RÉUSSI | Ratio texte/fond ≥ 4,5 pour les deux palettes |
@@ -42,7 +70,7 @@ YunoHost et `banner_logo` natif pour les grandes bannières CLI/TUI.
 Les derniers changements n'affectent pas le frontend compilé ; le build adapté
 déjà validé est utilisé par le test Chrome rejoué avec les 36 tests Python.
 
-## Lot Connecteurs `~ynh3` — résultats ACTUELS
+## Lot Connecteurs initialement `~ynh3`, intégré à `~ynh5`
 
 | Contrôle | Résultat | Portée |
 | --- | --- | --- |
@@ -97,6 +125,17 @@ L'API centrale n'expose aucune route d'approbation sur l'origine ou la socket He
   Ruff, ty, Bash et diff sans erreur. Runtime de contrôle isolé reconstruit par PM.
 - NON_EXÉCUTÉ : commandes privilégiées sur YunoHost réel et conversation avec un
   modèle réel. Ces tests prouvent la découverte et le routage, pas un déploiement.
+
+## Intégration de publication `~ynh5`
+
+- Assistance Matos `~ynh4` conservée : adaptateur natif, permissions, provisionneur,
+  sauvegarde/restauration, tests et workflow CI. Aucun commit distant retiré.
+- Connecteurs et assistance sont configurés ensemble. Les cookies SSO ne sont
+  transmis sur aucune des routes Hermes ; le Bearer du service Matos reste transmis.
+- Contrôle intégré : 99 tests collectés, 97 réussis, 2 tests navigateur ignorés ;
+  tests Node, types, lint et syntaxe contrôlés. La CI GitHub doit confirmer le SHA publié.
+- Aucun déploiement automatique sur le serveur client. Qualification YunoHost
+  complète toujours non exécutée pour les nouvelles capacités de cette Preview.
 
 Les tests de snapshots exécutent les scripts et `tar` sur un dossier temporaire
 avec SQLite. Les appels YunoHost et systemd sont simulés. Le smoke test démarre

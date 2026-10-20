@@ -23,3 +23,4 @@ fi
 ynh_config_remove_systemd
 ynh_config_remove_nginx
 hermes_retire_privileges
+rm -f /usr/local/sbin/arcenal-assistance-provision /etc/arcenal-assistance/agent.json

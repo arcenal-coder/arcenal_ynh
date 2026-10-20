@@ -1,5 +1,6 @@
 """Teste les vrais scripts et tar ; seuls les appels YunoHost sont simulés."""
 
+from contextlib import closing
 import os
 from pathlib import Path
 import sqlite3
@@ -29,6 +30,12 @@ ynh_abort_if_errors() { set -e; }
 ynh_app_setting_get() { printf '%s\n' fixture-node; }
 ynh_app_setting_set() { printf '%s\n' "$*" >> "$EVENTS"; }
 ynh_config_add_systemd() { return 0; }
+ynh_config_add_nginx() { return 0; }
+install() {
+    local source="${@: -2:1}"
+    [ -f "$source" ] || { printf 'Missing provisioner source: %s\n' "$source" >&2; return 1; }
+}
+/usr/local/sbin/arcenal-assistance-provision() { return 0; }
 test() { if [ "$1" = -x ]; then return 0; else builtin test "$@"; fi; }
 ynh_permission_url() { return 0; }
 ynh_permission_update() { printf '%s\n' "$*" >> "$EVENTS"; }
@@ -64,7 +71,7 @@ def execute(script, home, writer="none"):
                data_dir=str(home / "data"), domain="example.test", path="/arcenal",
                port="9119", COMMON=str(PACKAGE / "scripts/_common.sh"),
                SCRIPT=str(PACKAGE / "scripts" / script), EVENTS=str(home / "events"),
-               WRITER=writer, POLL_COUNT=str(home / "polls"))
+               WRITER=writer, POLL_COUNT=str(home / "polls"), YNH_APP_BASEDIR=str(PACKAGE))
     return subprocess.run(["bash", "-c", HARNESS], env=env, capture_output=True, text=True)
 
 
@@ -94,20 +101,20 @@ class SnapshotTests(unittest.TestCase):
             (home / "app").mkdir()
             (home / "data").mkdir()
             database = home / "data/state.db"
-            with sqlite3.connect(database) as connection:
+            with closing(sqlite3.connect(database)) as connection, connection:
                 connection.execute("create table messages (content text)")
                 connection.execute("insert into messages values ('avant sauvegarde')")
             backup = execute("backup", home)
             self.assertEqual(backup.returncode, 0, backup.stderr)
             self.assertEqual((home / "app/.ynh-data-snapshot.tar").stat().st_mode & 0o777, 0o600)
-            with sqlite3.connect(database) as connection:
+            with closing(sqlite3.connect(database)) as connection, connection:
                 connection.execute("insert into messages values ('après sauvegarde')")
             large = home / "data/large-user-file"
             with large.open("wb") as stream:
                 stream.truncate(500_000_001)
             restore = execute("restore", home)
             self.assertEqual(restore.returncode, 0, restore.stderr)
-            with sqlite3.connect(database) as connection:
+            with closing(sqlite3.connect(database)) as connection, connection:
                 self.assertEqual(connection.execute("pragma integrity_check").fetchone()[0], "ok")
                 self.assertEqual(connection.execute("select content from messages").fetchall(),
                                  [("avant sauvegarde",)])

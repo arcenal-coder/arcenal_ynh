@@ -1,0 +1,37 @@
+name: Verify native assistance preview
+on:
+  push:
+    branches: [preview, prepare/hermes-v0.22.2]
+    tags: ['v0.22.2-ynh*-preview']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      HERMES_HOME: /tmp/arcenal-native-check
+      HERMES_RUNTIME_DIR: /tmp/arcenal-native-tools
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: NousResearch/hermes-agent
+          ref: d923a5eb487a17c0a68801bba9ef0f56c81040a8
+          path: native-source
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14.7'
+      - name: Prepare exact native source and environment
+        run: |
+          mkdir -p "$HERMES_HOME" "$HERMES_RUNTIME_DIR"
+          python conf/prepare_web_base.py --source native-source --path /arcenal
+          python conf/prepare_arcenal.py --source native-source
+          python conf/prepare_assistance.py --source native-source
+          PYTHONPATH=native-source python -m pm.build_env --source "$PWD/native-source" --out "$RUNNER_TEMP/native-env" --extra web --extra pty --extra cron --extra mcp
+      - name: Check package and actual native dashboard
+        run: |
+          bash -n scripts/_common.sh scripts/_connectors.sh scripts/install scripts/upgrade scripts/backup scripts/restore scripts/remove
+          python -c 'import tomllib; tomllib.load(open("manifest.toml", "rb"))'
+          PYTHONPATH="conf:$PWD/native-source" "$RUNNER_TEMP/native-env/bin/python" -m unittest discover -s tests -p 'test_*.py' -v
