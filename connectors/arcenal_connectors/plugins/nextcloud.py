@@ -8,7 +8,7 @@ from ..network import object_response
 
 
 class Nextcloud:
-    tools = ("file.mkdir", "file.write", "file.delete")
+    tools = ("file.mkdir", "file.write", "file.delete", "file.share_group", "file.exists")
 
     def __init__(self, network):
         self.network = network
@@ -27,7 +27,19 @@ class Nextcloud:
 
     def execute(self, config, secret, name, target, data, profile, *, request_id=None):
         validate_action("nextcloud", name, target, data)
+        if name == "file.share_group":
+            from ..workflow_adapters import NextcloudProjects
+            adapter = NextcloudProjects(self, {"config": config, "secret": secret})
+            file_id = adapter.folder(target)
+            require(file_id is not None, "dossier_absent")
+            require(data["group"] in config.get("share_groups", []), "groupe_non_autorise")
+            if adapter.find_share(target, data["group"], file_id) is None:
+                adapter.create_share(target, data["group"], file_id)
+            return {"ok": True}
         path = "/remote.php/dav/files/" + quote(config["account"], safe="") + "/" + quote(target, safe="/")
+        if name == "file.exists":
+            code, _ = self.network.request_response(config, "HEAD", path, self.headers(config, secret), accepted=(404,))
+            return {"ok": True, "exists": code != 404}
         method = {"file.mkdir": "MKCOL", "file.write": "PUT", "file.delete": "DELETE"}[name]
         body = data["content"].encode() if name == "file.write" else None
         self.network.request(config, method, path, self.headers(config, secret), body)

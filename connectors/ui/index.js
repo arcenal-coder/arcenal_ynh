@@ -31,6 +31,9 @@ import { createRoot } from 'react-dom/client';
     const [editing, setEditing] = React.useState(null);
     const [review, setReview] = React.useState(null);
     const [audit, setAudit] = React.useState(null);
+    const [automations, setAutomations] = React.useState({ automations: [], runs: [], poll_errors: {} });
+    const [automationForm, setAutomationForm] = React.useState(false);
+    const [operations, setOperations] = React.useState([]);
 
     React.useEffect(() => {
       let live = true;
@@ -42,7 +45,8 @@ import { createRoot } from 'react-dom/client';
       if (!profile) return;
       let live = true;
       setState(null); setEditing(null); setReview(null); setAudit(null);
-      const refresh = () => api('state', profile).then(value => { if (live) { setState(value); setError(''); } })
+      const refresh = () => Promise.all([api('state', profile), api('automations', profile), api('operations', profile)]).then(([value, flows, requested]) => {
+        if (live) { setState(value); setAutomations(flows); setOperations(requested.operations); setError(''); } })
         .catch(() => { if (live) setError('Impossible de charger les connecteurs de ce profil.'); });
       void refresh();
       const timer = setInterval(refresh, 5000);
@@ -51,7 +55,7 @@ import { createRoot } from 'react-dom/client';
 
     async function run(action) {
       setBusy(true); setError('');
-      try { await action(); setState(await api('state', profile)); }
+      try { await action(); setState(await api('state', profile)); setAutomations(await api('automations', profile)); setOperations((await api('operations', profile)).operations); }
       catch (_) { setError('Opération refusée ou indisponible. Aucune nouvelle tentative automatique.'); }
       finally { setBusy(false); }
     }
@@ -104,6 +108,45 @@ import { createRoot } from 'react-dom/client';
         key: request.id, request, actor: identity.actor, busy,
         decide: (accept, mode, expires) => run(() => api('actions/' + request.id + '/decision', profile, { accept, mode, ...(expires ? { expires } : {}) })),
       })) : [h('p', { key: 'empty' }, 'Aucune action en attente.')]),
+      card('Opérations complètes', operations.length ? operations.map(item => h('article', { key: item.id, className: 'ac-card ac-review' },
+        h('h2', null, item.state === 'pending' ? 'Est-ce que je peux le faire ?' : item.plan.summary),
+        h('p', null, item.plan.summary + ' · ' + item.id + ' · ' + item.state),
+        h('h3', null, 'Conséquences importantes'), h('ul', null, ...item.plan.consequences.map((text, i) => h('li', { key: i }, text))),
+        h('pre', null, JSON.stringify(item.plan.steps, null, 2)), h('p', null, 'Rollback : ' + (item.plan.rollback || 'Non applicable, conséquences à accepter explicitement.')),
+        h('p', null, 'Valideur : ' + (item.validator || identity.actor)),
+        item.state === 'pending' && h('div', { className: 'ac-actions' },
+          button('Oui, exécuter l’opération complète', () => run(() => api('operations/' + item.id + '/decision', profile, { digest: item.digest, accept: true })), busy),
+          button('Non, refuser', () => run(() => api('operations/' + item.id + '/decision', profile, { digest: item.digest, accept: false })), busy)),
+        h('pre', null, JSON.stringify(item.results, null, 2)), item.error && h('p', { role: 'alert' }, item.error + ' · étape ' + item.failed_step)))
+        : [h('p', { key: 'empty' }, 'Aucune opération préparée.')]),
+      card('Automatismes métier autorisés', [
+        h('p', { key: 'policy' }, 'Le propriétaire valide la définition puis son activation. Le worker réalise ensuite ce flux sans demander une confirmation à chaque répétition. YunoHost et les actions sensibles restent séparés.'),
+        button('Définir un automatisme', () => setAutomationForm(true), busy),
+        ...automations.automations.map(item => h('article', { className: 'ac-card', key: item.id },
+          h('h2', null, item.id + ' · version ' + item.version + (item.enabled ? ' · Activé' : ' · Désactivé')),
+          h('p', null, 'Propriétaire : ' + item.owner), h('pre', null, JSON.stringify(item.spec, null, 2)),
+          h('div', { className: 'ac-actions' },
+            button('Activer cette version', () => confirm('Autoriser et activer le flux version ' + item.version,
+              { proprietaire: item.owner, operations: item.actions, perimetre: item.spec, consequence: 'Les exécutions nominales seront autonomes jusqu’à révocation. Aucun droit système global.' },
+              () => api('automations/' + item.id + '/activate', profile, { version: item.version, confirmed: true })), busy || item.enabled || item.owner !== identity.actor),
+            button('Arrêter / révoquer', () => confirm('Arrêter cet automatisme', { id: item.id, consequence: 'Aucune étape suivante ne sera autorisée ; les appels déjà partis ne sont pas annulables.' },
+              () => api('automations/' + item.id + '/disable', profile, { confirmed: true })), busy || !item.enabled),
+            button('Tester sans écrire', () => run(async () => confirm('Résultat du test en lecture seule',
+              await api('automations/' + item.id + '/preview', profile, { project: item.spec.projects[0] }), async () => {})), busy),
+            button('Préparer une nouvelle version', () => setAutomationForm(item.spec), busy || item.owner !== identity.actor)))),
+        ...Object.entries(automations.poll_errors).map(([id, value]) => h('p', { key: 'error-' + id, role: 'alert' }, id + ' · observation : ' + value.code + ' · ' + date(value.time))),
+      ]),
+      automationForm && state && h(AutomationWizard, { key: profile + (automationForm.id || 'new'), value: automationForm === true ? null : automationForm,
+        actor: identity.actor, busy, cancel: () => setAutomationForm(false), submit: spec => confirm('Valider la définition versionnée',
+          { proprietaire: identity.actor, definition: spec, consequence: 'Une nouvelle version désactive le flux et exige une activation séparée. Une définition identique reste inchangée.' },
+          async () => { await api('automations', profile, { definition: spec, confirmed: true }); setAutomationForm(false); }) }),
+      card('Journal des exécutions métier', automations.runs.length ? automations.runs.map(flow => h('article', { className: 'ac-card', key: flow.id },
+        h('p', null, flow.id + ' · ' + flow.automation + ' v' + flow.version + ' · projet ' + flow.project),
+        h('p', { role: 'status' }, flow.state + ' · étape ' + flow.step + (flow.error ? ' · ' + flow.error : '')),
+        h('pre', null, JSON.stringify(flow.steps, null, 2)),
+        button('Réconcilier / reprendre', () => confirm('Reprendre sans rejouer aveuglément', { execution: flow.id, etape: flow.step, erreur: flow.error },
+          () => api('automations/' + flow.id + '/retry', profile, { confirmed: true })), busy || !['failed', 'needs_review'].includes(flow.state))))
+        : [h('p', { key: 'empty' }, 'Aucune exécution métier.')]),
       state && card('Délégations', state.grants.length ? state.grants.map(grant => h('div', { key: grant.id },
         h('p', null, grant.connector + ' · ' + grant.operation + ' · ' + grant.target + ' · ' + grant.mode + ' · expiration ' + date(grant.expires)
           + (grant.revoked ? ' · Révoquée' : ' · Valideur : ' + grant.validator)),
@@ -124,6 +167,8 @@ import { createRoot } from 'react-dom/client';
     const [url, setUrl] = React.useState(connector.config?.url || (connector.id === 'yunohost' ? 'https://' + window.location.hostname : ''));
     const [account, setAccount] = React.useState(connector.config?.account || (connector.id === 'yunohost' ? 'arcenal-connectors' : 'arcenal-'));
     const [entity, setEntity] = React.useState(connector.config?.entity || '');
+    const [groups, setGroups] = React.useState((connector.config?.share_groups || []).join(', '));
+    const [projectFields, setProjectFields] = React.useState((connector.config?.project_link_fields || []).join(', '));
     const [scope, setScope] = React.useState(Object.fromEntries(Object.keys(catalog).map(name => [name, (connector.config?.scope[name] || []).join(', ')])));
     const secret = React.useRef(null);
     const input = (label, value, change, props = {}) => h('label', null, label,
@@ -133,20 +178,46 @@ import { createRoot } from 'react-dom/client';
       const value = { url, account, scope: Object.fromEntries(Object.entries(scope).filter(([, text]) => text.trim())
         .map(([name, text]) => [name, text.split(',').map(target => target.trim()).filter(Boolean)])) };
       if (entity) value.entity = Number(entity);
+      if (connector.id === 'nextcloud') value.share_groups = groups.split(',').map(s => s.trim()).filter(Boolean);
+      if (connector.id === 'dolibarr') value.project_link_fields = projectFields.split(',').map(s => s.trim()).filter(Boolean);
       if (secret.current?.value) { value.secret = secret.current.value; secret.current.value = ''; }
       void submit(value);
     } }, h('h2', null, 'Configurer ' + connector.label),
       input(connector.id === 'dolibarr' ? 'URL API HTTPS (terminant par /api/index.php)' : 'URL du service HTTPS', url, setUrl, { type: 'url', required: true }),
       input('Compte technique dédié (préfixe arcenal- ou arcenal_)', account, setAccount, { required: true, readOnly: connector.id === 'yunohost' }),
       connector.id === 'dolibarr' && input('Entité Dolibarr (facultative)', entity, setEntity, { type: 'number', min: 1 }),
+      connector.id === 'dolibarr' && input('Extrachamps lien autorisés (ex. options_nextcloud_url)', projectFields, setProjectFields),
+      connector.id === 'nextcloud' && input('Groupes de partage en lecture autorisés', groups, setGroups),
       connector.id !== 'yunohost' && h('label', null, connector.id === 'dolibarr' ? 'Nouveau jeton API (jamais relu)' : 'Nouveau mot de passe d’application / jeton dédié (jamais relu)',
         h('input', { ref: secret, type: 'password', autoComplete: 'new-password', spellCheck: false, required: !connector.has_secret })),
       connector.id === 'yunohost' && h('p', null, 'Identité système gérée par le serveur ; aucune identité administrateur personnelle. Le périmètre système peut être plus restrictif que le formulaire.'),
       ...Object.entries(catalog).map(([name, op]) => h('div', { key: name }, input(op.label + ' — cibles séparées par des virgules', scope[name],
         value => setScope(old => ({ ...old, [name]: value }))), h('small', null,
-        connector.id === 'dolibarr' ? 'Exemples : company:123 pour créer, contact:45 pour supprimer.'
+        connector.id === 'dolibarr' ? 'Exemples : company:123, contact:45, project:42 selon l’opération.'
           : connector.id === 'nextcloud' ? 'Sous-arbres DAV sans / initial, par exemple ARCenal/Client-A.' : 'Noms exacts autorisés par la politique système, par exemple arcenal.'))),
       h('div', { className: 'ac-actions' }, h('button', { type: 'submit', disabled: busy }, 'Vérifier et préparer la validation'), button('Annuler', cancel, busy)));
+  }
+
+  function AutomationWizard({ value, actor, busy, cancel, submit }) {
+    const [form, setForm] = React.useState(value || { id: '', projects: [], status_field: 'opp_status', from_status: '',
+      to_statuses: [], base_folder: '', folders: [], share_group: '', link_field: '', interval: 60, ksaar_required: false });
+    const change = (key, value) => setForm(old => ({ ...old, [key]: value }));
+    const field = (label, key, list = false) => h('label', { key }, label, h('input', { required: !['folders'].includes(key), readOnly: key === 'id' && Boolean(value),
+      value: list ? form[key].join(', ') : form[key], onChange: event => change(key, list ? event.target.value.split(',').map(s => s.trim()) : event.target.value) }));
+    return h('form', { className: 'ac-card', onSubmit: event => { event.preventDefault();
+      submit({ ...form, projects: form.projects.filter(Boolean), to_statuses: form.to_statuses.filter(Boolean), folders: form.folders.filter(Boolean) }); } },
+      h('h2', null, 'Définition du flux projet · propriétaire ' + actor),
+      h('p', null, 'La première observation sert de référence. Configurez la valeur réelle de Prospection sur votre Dolibarr ; aucun statut numérique n’est supposé.'),
+      field('Identifiant de l’automatisme', 'id'), field('Identifiants des projets, séparés par virgules', 'projects', true),
+      field('Champ de statut (statut, opp_status ou array_options.options_...)', 'status_field'), field('Valeur source « Prospection »', 'from_status'),
+      field('Valeurs de destination éligibles', 'to_statuses', true), field('Dossier racine Nextcloud préexistant', 'base_folder'),
+      field('Sous-dossiers à créer dans project-<id>', 'folders', true), field('Groupe Nextcloud autorisé (lecture seule)', 'share_group'),
+      field('Extrachamp Dolibarr du lien', 'link_field'),
+      h('label', null, 'Intervalle de lecture (30 à 3600 secondes)', h('input', { type: 'number', min: 30, max: 3600, value: form.interval,
+        onChange: event => change('interval', Number(event.target.value)) })),
+      h('label', null, h('input', { type: 'checkbox', checked: form.ksaar_required, onChange: event => change('ksaar_required', event.target.checked) }),
+        'Ksaar obligatoire — activation refusée tant que son connecteur réel n’est pas livré'),
+      h('div', { className: 'ac-actions' }, h('button', { type: 'submit', disabled: busy }, 'Préparer la validation de la définition'), button('Annuler', cancel, busy)));
   }
 
   function Approval({ request, actor, decide, busy }) {

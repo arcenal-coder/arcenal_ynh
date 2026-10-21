@@ -17,6 +17,9 @@ from .network import Network
 from .plugins import registry
 from .plugins.yunohost import LocalHelper
 from .store import Store
+from .automations import Automations
+from .operations import Operations
+from .cli_authority import host_actions
 
 
 class Authority:
@@ -25,6 +28,7 @@ class Authority:
         self.plugins = plugins
         self.clock = clock
         self.stores = {}
+        self.engines = {}
         self.lock = threading.Lock()
 
     def settings(self):
@@ -55,6 +59,36 @@ class Authority:
         settings = self.settings()
         for profile in settings.get("profile_uids", {}):
             self.store(profile, settings).recover_interrupted()
+            self.operations(profile, settings).recover_interrupted()
+
+    def operations(self, profile, settings):
+        def allowed(actor):
+            principal = self.settings().get("principals", {}).get(actor, {})
+            return principal.get("role") == "admin" and profile in principal.get("profiles", [])
+        def cli_actions():
+            require(self.settings().get("operation_authority", {}).get(profile) is True,
+                    "autorite_operationnelle_a_installer")
+            return host_actions()
+        return Operations(self.store(profile, settings), allowed, cli_actions)
+
+    def automations(self, profile, settings):
+        store = self.store(profile, settings)
+        if profile not in self.engines:
+            def owner_allowed(actor):
+                current = self.settings()
+                principal = current.get("principals", {}).get(actor, {})
+                return (profile in current.get("profile_uids", {}) and principal.get("role") == "admin"
+                        and profile in principal.get("profiles", []))
+            self.engines[profile] = Automations(store, owner_allowed)
+        return self.engines[profile]
+
+    def automation_tick(self):
+        settings = self.settings()
+        for profile in settings.get("profile_uids", {}):
+            try:
+                self.automations(profile, settings).tick()
+            except Exception:
+                print('{"event":"automate_worker_echec","code":"service_indisponible"}', flush=True)
 
     def dispatch(self, surface, headers, method, url, body, peer_uid=None):
         headers = {k.lower(): v for k, v in headers.items()}
@@ -89,11 +123,27 @@ class Authority:
             require(surface == "admin", "surface_refusee")
             if parts == ["v1", "state"]:
                 return store.list(actor)
+            if parts == ["v1", "automations"]:
+                return self.automations(profile, settings).state(actor)
+            if parts == ["v1", "operations"]:
+                return self.operations(profile, settings).state(actor)
             if len(parts) == 3 and parts[:2] == ["v1", "audit"]:
                 return store.audit(actor, parts[2])
         if method == "POST":
             require(isinstance(body, dict))
             if surface == "agent":
+                if parts == ["v1", "operations", "describe"]:
+                    fields(body, ("argv",))
+                    return self.operations(profile, settings).describe_cli(body["argv"])
+                if parts == ["v1", "operations"]:
+                    fields(body, ("plan",))
+                    return self.operations(profile, settings).prepare(body["plan"])
+                if parts == ["v1", "operations", "status"]:
+                    fields(body, ("id",))
+                    return self.operations(profile, settings).status(body["id"])
+                if parts == ["v1", "automations", "status"]:
+                    fields(body, ())
+                    return self.automations(profile, settings).state(actor)
                 if parts == ["v1", "actions", "status"]:
                     fields(body, ("id",))
                     return store.action_status(body["id"])
@@ -104,6 +154,26 @@ class Authority:
                     fields(body, ("session",))
                     return store.end_session(body["session"])
                 raise Denied("surface_refusee")
+            if len(parts) == 4 and parts[1] == "operations" and parts[3] == "decision":
+                fields(body, ("digest", "accept"))
+                return self.operations(profile, settings).decide(actor, parts[2], body["digest"], body["accept"])
+            if parts == ["v1", "automations"]:
+                fields(body, ("definition", "confirmed"))
+                return self.automations(profile, settings).save(actor, body["definition"], body["confirmed"])
+            if len(parts) == 4 and parts[1] == "automations":
+                engine = self.automations(profile, settings)
+                if parts[3] == "activate":
+                    fields(body, ("version", "confirmed"))
+                    return engine.activate(actor, parts[2], body["version"], body["confirmed"])
+                if parts[3] == "disable":
+                    fields(body, ("confirmed",))
+                    return engine.disable(actor, parts[2], body["confirmed"])
+                if parts[3] == "preview":
+                    fields(body, ("project",))
+                    return engine.preview(actor, parts[2], body["project"])
+                if parts[3] == "retry":
+                    fields(body, ("confirmed",))
+                    return engine.retry(actor, parts[2], body["confirmed"])
             if parts == ["v1", "configuration"]:
                 fields(body, ("connector", "config"))
                 if body["connector"] == "yunohost":
@@ -208,6 +278,15 @@ def main():
     args = parser.parse_args()
     authority = Authority(args.config)
     authority.recover_interrupted()
+    stop_worker = threading.Event()
+    def worker():
+        while not stop_worker.is_set():
+            try:
+                authority.automation_tick()
+            except Exception:
+                print('{"event":"automate_worker_echec","code":"configuration_indisponible"}', flush=True)
+            stop_worker.wait(5)
+    threading.Thread(target=worker, daemon=True).start()
     servers = []
     for surface, group in (("admin", "www-data"), ("agent", "arcenal")):
         path = Path(args.runtime) / (surface + ".sock")
@@ -222,6 +301,7 @@ def main():
     try:
         threading.Event().wait()
     finally:
+        stop_worker.set()
         for server in servers:
             server.shutdown()
             server.server_close()

@@ -21,6 +21,10 @@ from tools.registry import registry
 from hermes_cli.plugins import render_system_prompt_sections
 sections=render_system_prompt_sections({"platform":"cli"})
 native=next(section for section in sections if section.id=="arcenal.yunohost")
+from arcenal_connectors.authority_policy import CONTENT, QUESTION
+authority=next(section for section in sections if section.id=="arcenal.authority")
+assert authority.content==CONTENT.strip()
+assert QUESTION in authority.content and "sous-étapes" in authority.content
 assert "arcenal_yunohost" in native.content and "server.inventory" in native.content
 assert "action.status" in native.content
 from hermes_cli.tools_config import _get_platform_tools
@@ -50,6 +54,14 @@ with patch("arcenal_connectors.edge.call", return_value={"state":"done","ok":Tru
     result=registry.dispatch("arcenal_yunohost", {"operation":"action.status","target":"a"*32,"data":{}},session_id="real_session")
     assert json.loads(result)["state"]=="done"
     assert client.call_args.args==("/v1/actions/status",{"id":"a"*32})
+with patch("arcenal_connectors.edge.UnixConnection") as transport:
+    transport.return_value.getresponse.return_value.read.return_value=json.dumps({"id":"b"*32,"question":QUESTION,"state":"pending"}).encode()
+    refused=registry.dispatch("arcenal_operation", {"action":"approve","id":"b"*32},session_id="real_session")
+    assert json.loads(refused)["error"]=="arguments_non_autorises"
+    assert not transport.called
+    result=registry.dispatch("arcenal_operation", {"action":"prepare","plan":{"summary":"test"}},session_id="real_session")
+    assert json.loads(result)["question"]==QUESTION
+    assert transport.return_value.request.call_args.args[1]=="/v1/operations"
 from hermes_cli.lifecycle import invoke_hook
 with patch("arcenal_connectors.edge.call", return_value={"ok":True}) as client:
     invoke_hook("on_session_end", session_id="real_session", turn_id="turn_1", completed=True)

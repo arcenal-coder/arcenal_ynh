@@ -1,5 +1,9 @@
 # Administration YunoHost native dans Hermes
 
+Évolution locale OP-01 : le plan approuvé peut utiliser les commandes officielles
+réellement déclarées par l'hôte, au-delà des raccourcis ci-dessous. Une confirmation
+couvre l'opération entière et ses vérifications. Voir `AUTORITE_OPERATIONNELLE.md`.
+
 Candidate `0.22.2~ynh5`, publication Preview autorisée ; non installée sur le serveur.
 Les versions précédentes, dont l'assistance Matos `~ynh4`, n'incluent pas cette fonction.
 

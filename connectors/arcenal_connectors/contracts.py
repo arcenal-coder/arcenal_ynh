@@ -68,6 +68,8 @@ CATALOG: dict[str, ConnectorSpec] = {
     "dolibarr": {
         "plugin": "arcenal-dolibarr", "label": "Dolibarr",
         "operations": {
+            "project.read": Operation("Lire un projet autorisé", "Le projet autorisé sera consulté.", writes=False),
+            "project.update_link": Operation("Renseigner le lien du projet", "Le seul extrachamp déclaré du projet sera renseigné."),
             "contact.create": Operation("Créer un contact", "Un contact sera créé dans la société autorisée."),
             "contact.delete": Operation("Supprimer un contact", "Le contact sera supprimé.", True),
         },
@@ -75,6 +77,8 @@ CATALOG: dict[str, ConnectorSpec] = {
     "nextcloud": {
         "plugin": "arcenal-nextcloud", "label": "Nextcloud",
         "operations": {
+            "file.share_group": Operation("Partager un dossier au groupe autorisé", "Un partage de lecture au groupe déclaré sera créé.", True),
+            "file.exists": Operation("Vérifier l'existence d'une cible", "La cible sera vérifiée en lecture.", writes=False),
             "file.mkdir": Operation("Créer un dossier", "Un dossier sera créé dans le sous-arbre autorisé."),
             "file.write": Operation("Écrire un fichier", "Le contenu du fichier sera créé ou remplacé."),
             "file.delete": Operation("Supprimer un fichier ou dossier", "La cible et son éventuel contenu seront supprimés.", True),
@@ -104,6 +108,15 @@ def validate_action(connector, name, target, data):
     operation(connector, name)
     require(isinstance(target, str) and isinstance(data, dict))
     if connector == "dolibarr":
+        if name.startswith("project."):
+            require(re.fullmatch(r"project:[1-9][0-9]{0,9}", target))
+            if name == "project.read":
+                fields(data, ())
+            else:
+                fields(data, ("field", "url"))
+                require(isinstance(data["field"], str) and re.fullmatch(r"options_[a-z0-9_]{1,48}", data["field"]))
+                service_url(data["url"])
+            return
         prefix = "company:" if name == "contact.create" else "contact:"
         require(re.fullmatch(re.escape(prefix) + r"[1-9][0-9]{0,9}", target))
         if name == "contact.create":
@@ -114,7 +127,10 @@ def validate_action(connector, name, target, data):
             fields(data, ())
     elif connector == "nextcloud":
         dav_path(target)
-        if name == "file.write":
+        if name == "file.share_group":
+            fields(data, ("group",))
+            require(isinstance(data["group"], str) and re.fullmatch(r"[a-zA-Z0-9_.@-]{1,64}", data["group"]))
+        elif name == "file.write":
             fields(data, ("content",))
             require(isinstance(data["content"], str) and len(data["content"].encode()) <= 8192)
         else:
@@ -138,7 +154,7 @@ def in_scope(connector, name, target, scope):
 
 def validate_configuration(connector, value):
     require(isinstance(connector, str) and connector in CATALOG, "connecteur_non_autorise")
-    fields(value, ("url", "account", "scope"), ("secret", "entity"))
+    fields(value, ("url", "account", "scope"), ("secret", "entity", "share_groups", "project_link_fields"))
     url = service_url(value["url"])
     account = value["account"]
     require(isinstance(account, str) and re.fullmatch(r"arcenal[-_][a-zA-Z0-9_-]{1,48}", account),
@@ -157,7 +173,21 @@ def validate_configuration(connector, value):
         require(isinstance(targets, list) and 0 < len(targets) <= 50)
         for target in targets:
             sample = {"lastname": "Validation"} if name == "contact.create" else {}
+            if name == "project.update_link":
+                sample = {"field": "options_nextcloud_url", "url": "https://nextcloud.test/index.php/f/1"}
+            if name == "file.share_group":
+                sample = {"group": "arcenal-team"}
             if name == "file.write":
                 sample = {"content": ""}
             validate_action(connector, name, target, sample)
-    return {"url": url, "account": account, "scope": scope, "entity": entity}
+    result = {"url": url, "account": account, "scope": scope, "entity": entity}
+    for key, app, pattern in (("share_groups", "nextcloud", r"[a-zA-Z0-9_.@-]{1,64}"),
+                              ("project_link_fields", "dolibarr", r"options_[a-z0-9_]{1,48}")):
+        values = value.get(key, [])
+        require(isinstance(values, list) and len(values) <= 20 and
+                all(isinstance(item, str) and re.fullmatch(pattern, item) for item in values))
+        require(not values or connector == app)
+        result[key] = values
+    require("file.share_group" not in scope or bool(result["share_groups"]), "groupe_autorise_requis")
+    require("project.update_link" not in scope or bool(result["project_link_fields"]), "extrachamp_autorise_requis")
+    return result

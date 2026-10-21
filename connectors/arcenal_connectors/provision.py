@@ -123,12 +123,16 @@ def main():
     parser.add_argument("--plugins-source", required=True)
     parser.add_argument("--native-yunohost", action="store_true")
     parser.add_argument("--inventory-json", help="Inventaire minimal collecté par l'installateur root")
+    parser.add_argument("--operation-authority", action="store_true")
     args = parser.parse_args()
     require(os.getuid() == 0, "root_requis")
     home = Path(args.hermes_home)
     require(not args.native_yunohost or args.inventory_json is not None, "inventaire_requis")
     inventory = json.loads(args.inventory_json) if args.native_yunohost else None
     policy = bootstrap(Path(args.policy), args.vault_root, home, args.profile, json.loads(args.users_json), args.origin, inventory)
+    if args.operation_authority:
+        policy.setdefault("operation_authority", {})[args.profile] = True
+        atomic(Path(args.policy), json.dumps(policy, indent=2) + "\n", 0o640)
     uid = pwd.getpwnam("arcenal-connectors").pw_uid
     gid = grp.getgrnam("arcenal-connectors").gr_gid
     os.chown(args.policy, 0, gid)

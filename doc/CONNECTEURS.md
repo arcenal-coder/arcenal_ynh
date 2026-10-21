@@ -1,5 +1,10 @@
 # Connecteurs centraux — candidate `0.22.2~ynh5`
 
+Recadrage local OP-01 dans la candidate `~ynh6` : les demandes composées passent
+par un plan unique et son accord humain, sans confirmation artificielle de chaque
+sous-étape. Les interfaces historiques ci-dessous sont conservées ; le comportement
+actuel et les limites sont décrits dans `AUTORITE_OPERATIONNELLE.md`.
+
 Statut : **candidate locale, non publiée, non déployée**. Base Hermes v0.22.2
 et paquet précédent `8324eed`. Qualification YunoHost réelle encore requise.
 

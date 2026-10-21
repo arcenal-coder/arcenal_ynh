@@ -7,7 +7,7 @@ name = "ARCenal Agent"
 description."en" = "Self-hosted AI assistant based on Hermes with a native YunoHost dashboard"
 description."fr" = "Assistant IA basé sur Hermes avec dashboard natif YunoHost et thème Gratitude"
 
-version = "0.22.2~ynh5"
+version = "0.22.2~ynh6"
 
 maintainers = ["compteonyx"]
 

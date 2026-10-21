@@ -1,5 +1,13 @@
 # Administration — ARCenal Agent sur YunoHost
 
+Recadrage local OP-01 : une autorisation pour l'opération complète, pas pour
+chaque sous-étape. Cadrage, fichiers et limites :
+[AUTORITE_OPERATIONNELLE.md](AUTORITE_OPERATIONNELLE.md).
+
+Évolution locale `~ynh6` : automatisation métier autorisée à l'activation, sans
+confirmation répétitive nominale. Diagnostic, recette et rollback :
+[AUTOMATISMES.md](AUTOMATISMES.md). Aucune bascule n8n ni opération réelle exécutée.
+
 Candidate Connecteurs `0.22.2~ynh5` : voir [CONNECTEURS.md](CONNECTEURS.md)
 pour la console administrateur isolée, le coffre, les comptes techniques et la
 configuration des clients. Le cœur Hermes n'est pas modifié par cette extension.

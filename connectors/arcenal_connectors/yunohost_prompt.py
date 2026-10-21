@@ -7,11 +7,14 @@ dans les outils de ta session ; respecte une éventuelle désactivation explicit
 Pour connaître les ressources autorisées, appelle server.inventory avec
 target=server et data={}. Pour lire un service, utilise service.status et son
 nom exact. Les noms peuvent contenir des points, par exemple php8.2-fpm.
-Tu peux demander service.start, service.stop, service.restart et backup.create
-sur les seules cibles autorisées. data reste un objet vide.
-Toute mutation attend une validation humaine unique dans Connecteurs. Un message
-de chat ne vaut pas validation. Si approval_required=true, donne l'identifiant
-de demande et invite l'administrateur à la valider/refuser dans la console.
+Les raccourcis service.start/stop/restart et backup.create existent ; ils ne
+définissent pas à eux seuls toute ton autorité. data y reste un objet vide.
+Pour une demande qui écrit, utilise l'opération complète décrite dans la politique
+arcenal.authority : annonce les conséquences et demande une seule autorisation.
+Les étapes YunoHost peuvent employer la CLI officielle via kind=yunohost_cli,
+sans se limiter aux raccourcis ci-dessus. La vérification attendue fait partie du
+plan. Un accord couvre les sous-étapes déclarées ; ne redemande pas artificiellement.
+L'outil historique ci-dessus reste disponible pour la lecture et les demandes simples.
 Pour connaître son résultat après validation, appelle action.status avec comme
 target cet identifiant et data={}. Ne soumets pas une deuxième mutation pour
 obtenir son résultat : cela créerait une nouvelle demande.

@@ -46,11 +46,21 @@ def main():
     try:
         if os.getuid() != 0 or os.environ.get("SUDO_USER") != "arcenal-connectors":
             raise ValueError("refus")
-        content = sys.stdin.buffer.read(4097)
-        if len(content) > 4096:
+        content = sys.stdin.buffer.read(32769)
+        if len(content) > 32768:
             raise ValueError("refus")
         request = json.loads(content)
         policy = json.loads(Path("/etc/arcenal-connectors/policy.json").read_text())
+        if request.get("operation") == "approved.cli":
+            if set(request) != {"profile", "operation", "request_id", "argv", "verify", "generated_values"}:
+                raise ValueError("refus")
+            if not re.fullmatch(r"[a-f0-9]{32}", request["request_id"]) or not policy.get("operation_authority", {}).get(request["profile"]):
+                raise ValueError("autorite operationnelle non configuree")
+            sys.path.insert(0, "/usr/local/lib/arcenal-connectors")
+            from arcenal_connectors.cli_authority import execute
+            result = execute(request["argv"], request["verify"]["argv"], request["verify"]["expected"], request["generated_values"])
+            print(json.dumps(result))
+            return 0 if result["ok"] else 1
         command = build_command(request, policy)
         if request["operation"] == "server.inventory":
             sys.path.insert(0, "/usr/local/lib/arcenal-connectors")

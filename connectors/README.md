@@ -1,5 +1,10 @@
 # ARCenal Connecteurs — contrats centraux v1
 
+Extension AUT-01 locale : définitions d'automatismes validées par leur propriétaire,
+worker déterministe, journal et effets persistants dans le coffre existant. Les
+actions métier approuvées sont exécutées sans validation à chaque répétition.
+Contrat et limites : `../doc/AUTOMATISMES.md`. Aucun adaptateur Ksaar fictif.
+
 Ces composants appartiennent à la distribution ARCenal, pas au cœur Hermes.
 Le service central est l'autorité de secrets, d'autorisations et d'audit. Les
 plugins Hermes ne disposent que d'une identité OS liée à un profil et du droit de

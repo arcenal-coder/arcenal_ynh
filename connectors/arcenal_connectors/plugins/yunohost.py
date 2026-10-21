@@ -9,6 +9,19 @@ from ..inventory import validate_inventory
 
 
 class LocalHelper:
+    def approved_cli(self, profile, step, generated_values, request_id):
+        payload = {"profile": profile, "operation": "approved.cli", "request_id": request_id,
+                   "argv": step["argv"], "verify": step["verify"], "generated_values": generated_values}
+        try:
+            result = subprocess.run(["/usr/bin/sudo", "-n", "/usr/local/libexec/arcenal-yunohost"],
+                input=json.dumps(payload), text=True, capture_output=True, timeout=300, check=False)
+            require(result.returncode == 0, "commande_yunohost_echec")
+            value = json.loads(result.stdout)
+            require(isinstance(value, dict), "preuve_yunohost_invalide")
+            return {"ok": value.get("ok") is True, "verified": value.get("verified") is True}
+        except (OSError, ValueError, subprocess.SubprocessError):
+            raise Denied("commande_yunohost_echec") from None
+
     def request(self, profile, operation, target, request_id=None):
         try:
             result = subprocess.run(

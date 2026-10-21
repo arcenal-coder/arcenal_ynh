@@ -32,6 +32,9 @@ class Network:
         self.networks = tuple(ipaddress.ip_network(value) for value in networks)
 
     def request(self, config, method, suffix, headers=None, body=None):
+        return self.request_response(config, method, suffix, headers, body)[1]
+
+    def request_response(self, config, method, suffix, headers=None, body=None, accepted=()):
         base = urlsplit(config["url"])
         try:
             addresses = {str(item[4][0]) for item in socket.getaddrinfo(base.hostname, 443, type=socket.SOCK_STREAM)}
@@ -46,7 +49,7 @@ class Network:
                 deadline = time.monotonic() + 20
                 client.request(method, quote(base.path, safe="/") + suffix, body=body, headers=request_headers)
                 response = client.getresponse()
-                require(200 <= response.status < 300, "connexion_ou_action_refusee")
+                require(200 <= response.status < 300 or response.status in accepted, "connexion_ou_action_refusee")
                 content = bytearray()
                 while True:
                     require(time.monotonic() <= deadline, "delai_connexion_depasse")
@@ -55,7 +58,7 @@ class Network:
                         break
                     content.extend(chunk)
                     require(len(content) <= 65536, "reponse_distante_invalide")
-                return bytes(content)
+                return response.status, bytes(content)
             finally:
                 client.close()
         except Denied:

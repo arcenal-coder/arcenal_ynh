@@ -101,6 +101,17 @@ def restore(path, destination=Path("/")):
                         if request["state"] in ("pending", "executing"):
                             request["state"] = "invalidated_by_restore"
                             store._write(db, "request", key, request)
+                    for key, automation in store._items(db, "automation"):
+                        automation["enabled"] = False
+                        automation["epoch"] = uuid.uuid4().hex
+                        store._write(db, "automation", key, automation)
+                    for key, authorization in store._items(db, "automation_authorization"):
+                        authorization["revoked"] = True
+                        store._write(db, "automation_authorization", key, authorization)
+                    for key, planned in store._items(db, "operation"):
+                        if planned["state"] in ("pending", "executing"):
+                            planned["state"] = "invalidated_by_restore"
+                            store._write(db, "operation", key, planned)
                     store._audit(db, "restauration_autorisations_invalidees", "restore")
 
 

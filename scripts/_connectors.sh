@@ -54,7 +54,7 @@ hermes_connectors_configure() {
     /usr/bin/python3 -I -B /usr/local/lib/arcenal-connectors/run.py provision \
         --hermes-home "$data_dir" --users-json "$administrators" --origin "https://$domain:$port_connectors" \
         --plugins-source /usr/local/lib/arcenal-connectors/hermes-plugins \
-        --native-yunohost --inventory-json "$inventory"
+        --native-yunohost --inventory-json "$inventory" --operation-authority
     chown -R "$connector_user:$connector_user" /var/lib/arcenal-connectors
     install -o root -g root -m 0440 /usr/local/lib/arcenal-connectors/connectors-sudoers /etc/sudoers.d/arcenal-connectors
     visudo --check --file=/etc/sudoers.d/arcenal-connectors

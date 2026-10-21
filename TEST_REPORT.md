@@ -1,4 +1,49 @@
-# Rapport de contrôle — ARCenal Agent `0.22.2~ynh5`
+# Rapport de contrôle — candidate locale ARCenal Agent `0.22.2~ynh6`
+
+## OP-01 — recadrage et autorisation de l'opération complète, ACTUEL
+
+- Aucun nouvel automatisme métier concret ni nouvelle architecture métier.
+  Travaux AUT-01 antérieurs conservés sans activation réelle.
+- Contrat commun : plan et conséquences, « Est-ce que je peux le faire ? »,
+  accord humain sur l'empreinte du plan, toutes les étapes et preuves, bilan/rollback.
+- Outil natif `arcenal_operation` : description CLI de l'hôte, préparation et
+  statut ; aucune auto-approbation du modèle. Console : accord/refus unique.
+- CLI YunoHost officielle déclarée par l'hôte, pas seulement les six raccourcis ;
+  secrets générés au coffre, arguments sensibles injectés en mémoire de l'entrée
+  officielle, pas dans l'argv OS d'un enfant. Aucun résultat CLI brut publié.
+- Test d'une confirmation couvrant création ET activation de définition existante,
+  seulement sur fixtures. Vérifications obligatoires et arrêt après échec de preuve.
+- Contrôles : **129 tests collectés, 126 réussis, 3 ignorés** (deux navigateurs,
+  TUI précompilé) ; **2 tests Node réussis**, Ruff/ty et compilation console conformes.
+- NON VÉRIFIÉ : exécution CLI officielle via runpy sur YunoHost réel, ses
+  redactions/journaux, sudo/SSO et comportement d'un modèle en conversation réelle.
+- Limites honnêtes : `doc/AUTORITE_OPERATIONNELLE.md`. Le oui libre du chat n'est
+  pas encore une preuve SSO liée à l'opération ; l'accord effectif est la carte
+  authentifiée. Aucun déploiement, privilège serveur modifié, commit ou publication.
+
+## AUT-01 — état ACTUEL, aucune publication ni opération réelle
+
+- Diagnostic en lecture seule et architecture : `doc/AUTOMATISMES.md`.
+- Extension du coffre/exécuteur existant, pas de réécriture d'Hermes ni de YunoHost.
+- Automates versionnés, consentements par propriétaire/version, révocation,
+  observation planifiée authentifiée, baux, effets idempotents et reprise par étape.
+- Flux projet Dolibarr → dossiers/partage groupe Nextcloud → extrachamp Dolibarr.
+  Ksaar obligatoire bloque l'activation ; optionnel reste explicitement non applicable.
+- Linter Ruff, typage ty, compilation esbuild et syntaxe Bash/JS : RÉUSSI.
+- Tests ciblés : **16 réussis**, avec moteur/adaptateurs réels et produits simulés
+  par HTTP authentifié ; pertes de réponse, arrêt/révocation, redémarrage et restauration.
+- Suite utile : **115 collectés, 112 réussis, 3 ignorés** : deux recettes Chrome
+  et le lancement TUI précompilé indisponibles dans la copie de contrôle.
+- Tests Node : **2 réussis**. Les anciens résultats ci-dessous sont HISTORIQUES.
+- L'ancienne copie temporaire Hermes était incomplète ; contrôle élargi rétabli
+  sur une archive Git exacte `d923a5eb`, préparée uniquement dans un dossier de test.
+- Aucune nouvelle dépendance applicative. Environnement PM et dépendances NPM de
+  compilation verrouillées restaurés isolément après information du client.
+- **NON VÉRIFIÉ** : flux sur produits réels, mapping Prospection, droits source,
+  Ksaar, SSO/cycle YunoHost, exhaustivité des transitions par polling, alertes externes,
+  reprise/bascule n8n. L'autonomie métier de production n'est pas déclarée atteinte.
+
+## Historique — publication intégrée `~ynh5`
 
 ## Assistance Matos — 2026-10-19
 

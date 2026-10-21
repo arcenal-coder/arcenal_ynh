@@ -99,8 +99,8 @@ def register(ctx, connector):
                                                            "nextcloud": "file.write exige content (texte, 8 Kio maximum). Objet vide pour les autres opérations.",
                                                            "yunohost": "Objet vide ; aucun argument système libre."}[connector],
                                                        "properties": {name: {"type": "string"} for name in {
-                                                           "dolibarr": ("lastname", "firstname"),
-                                                           "nextcloud": ("content",), "yunohost": ()}[connector]}}},
+                                                           "dolibarr": ("lastname", "firstname", "field", "url"),
+                                                           "nextcloud": ("content", "group"), "yunohost": ()}[connector]}}},
                                "required": ["operation", "target", "data"]}},
         handler=propose,
     )
